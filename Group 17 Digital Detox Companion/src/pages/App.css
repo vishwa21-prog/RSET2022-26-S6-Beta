@@ -1,0 +1,251 @@
+/* App.css */
+body {
+  margin: 0;
+  padding: 0;
+  padding-top: 800px;
+  font-family: 'Poppins', sans-serif;
+  background: #0d0d0d; /* Dark background */
+  min-height: 100vh;
+  color: white;
+}
+
+.mood-tracker-container {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05); /* glass effect */
+  max-width: 500px;
+  margin: auto;
+  padding: 50px 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.App {
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  background: linear-gradient(90deg, #ff00cc, #3333ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+select,
+button {
+  padding: 12px 18px;
+  font-size: 16px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: none;
+  width: 80%;
+  max-width: 300px;
+  transition: 0.3s;
+}
+
+select {
+  background-color: #1a1a1a;
+  color: white;
+  border: 1px solid #444;
+}
+
+select:hover {
+  transform: scale(1.03);
+  border-color: #ff00cc;
+}
+
+button {
+  background: linear-gradient(135deg, #ff00cc, #3333ff);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+h2 {
+  margin-top: 30px;
+  color: #ccccff;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-top: 10px;
+}
+
+/* Mood tags */
+.mood-happy {
+  border-left: 5px solid #00ffcc;
+  background-color: rgba(0, 255, 204, 0.1);
+  color: #00ffcc;
+}
+
+.mood-sad {
+  border-left: 5px solid #3366ff;
+  background-color: rgba(51, 102, 255, 0.1);
+  color: #6699ff;
+}
+
+.mood-neutral {
+  border-left: 5px solid #999999;
+  background-color: rgba(153, 153, 153, 0.1);
+  color: #cccccc;
+}
+
+.mood-angry {
+  border-left: 5px solid #ff3333;
+  background-color: rgba(255, 51, 51, 0.1);
+  color: #ff6666;
+}
+
+.mood-tired {
+  border-left: 5px solid #ffcc00;
+  background-color: rgba(255, 204, 0, 0.1);
+  color: #ffdd57;
+}
+
+.mood-item {
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 10px;
+  font-weight: bold;
+  list-style: none;
+}
+
+.mood-card {
+  padding: 15px;
+  margin: 12px 0;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+  list-style: none;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Violet neon glow on hover only */
+.mood-card:hover {
+  box-shadow: 0 0 10px #a020f0, 0 0 20px #a020f0, 0 0 30px #a020f0;
+  border: 1px solid #a020f0;
+  transform: scale(1.02);
+}
+
+.mood-card .timestamp {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-top: 5px;
+}
+
+.mood-card .tip {
+  margin-top: 8px;
+  font-style: italic;
+  color: #ccccff;
+}
+
+.delete-btn {
+  float: right;
+  border: none;
+  border-radius: 10px;
+  padding: 6px;
+  background: linear-gradient(135deg, #a020f0, #e040fb);
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(160, 32, 240, 0.4);
+  transition: transform 0.2s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, #c040ff, #f060ff);
+}
+
+/* Optional: glowing button with animation */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px #9d00ff, 0 0 10px #9d00ff;
+  }
+  50% {
+    box-shadow: 0 0 20px #9d00ff, 0 0 30px #9d00ff;
+  }
+  100% {
+    box-shadow: 0 0 5px #9d00ff, 0 0 10px #9d00ff;
+  }
+}
+
+.glow-button {
+  animation: glow 2s infinite;
+  border: none;
+  background: linear-gradient(to right, #7f00ff, #e100ff);
+  color: white;
+  font-weight: bold;
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.glow-button:hover {
+  transform: scale(1.05);
+}
+
+/* Add mic button style */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255, 0, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 255, 0);
+  }
+}
+
+.mic-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(to right, #9f10bc, #6928d2);
+  box-shadow: 0 0 15px #9900ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.mic-button.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+.mood-history {
+  margin-top: 20px;
+  max-height: 300px; /* Set a max height for scrollability */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 10px;
+}
