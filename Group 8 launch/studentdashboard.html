@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | Placement Hire</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: #121212;
+            color: #fff;
+            padding: 30px 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            margin-right: 10px;
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffc107;
+        }
+
+        .sidebar-menu {
+            margin-top: 30px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .menu-text {
+            font-size: 0.95rem;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: #121212;
+        }
+
+        .welcome-message {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ffc107;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: #121212;
+            font-weight: bold;
+        }
+
+        .username {
+            font-weight: 500;
+        }
+
+        /* Job Listings Section */
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #121212;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: #ffc107;
+        }
+
+        .job-listings {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .job-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #ffc107;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .job-company {
+            font-weight: 600;
+            color: #121212;
+            font-size: 1.1rem;
+        }
+
+        .job-type {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .job-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #121212;
+        }
+
+        .job-details {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .job-detail {
+            display: flex;
+            align-items: center;
+        }
+
+        .job-detail i {
+            margin-right: 5px;
+            color: #ffc107;
+        }
+
+        .job-description {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .job-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .job-posted {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .apply-btn {
+            background-color: #ffc107;
+            color: #121212;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .apply-btn:hover {
+            background-color: #e6b000;
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #121212;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ffc107;
+        }
+
+        .submit-btn {
+            background-color: #ffc107;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #e6b000;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                position: relative;
+                padding: 20px;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .menu-item {
+                margin-bottom: 0;
+                padding: 10px;
+            }
+            
+            .menu-text {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="logo1.png" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-title">Placement Hire</div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <a href="jobsstudentview.html" class="menu-item">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="menu-text">Job Listings</span>
+                </a>
+                <a href="josh.html" class="menu-item">
+                    <i class="fas fa-robot"></i>
+                    <span class="menu-text">AI Resume Analysis</span>
+                </a>
+                <a href="studentvieequiz.html" class="menu-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="menu-text">Quizzes</span>
+                </a>
+                <a href="application-status.html" class="menu-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="menu-text">Application Status</span>
+                </a>
+                <a href="student-profile.html" class="menu-item">
+                    <i class="fas fa-user"></i>
+                    <span class="menu-text">Profile</span>
+                </a>
+                <a href="mainpage.html" class="menu-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="menu-text">Logout</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Welcome to Student Dashboard</h1>
+                <div class="user-profile">
+                    <div class="user-avatar">JS</div>
+                    <div class="username">John Student</div>
+                </div>
+            </div>
+
+            <p class="welcome-message">Browse available job listings below and apply to positions that match your skills.</p>
+            
+            <!-- Job Listings Section -->
+            <h2 class="section-title"><i class="fas fa-briefcase"></i> Job Listings</h2>
+            
+            <div class="job-listings">
+                <!-- Job Card 1 -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-company">TechSolutions Inc.</div>
+                        <div class="job-type">Full-time</div>
+                    </div>
+                    <h3 class="job-title">Frontend Developer</h3>
+                    <div class="job-details">
+                        <div class="job-detail"><i class="fas fa-map-marker-alt"></i> San Francisco, CA</div>
+                        <div class="job-detail"><i class="fas fa-money-bill-wave"></i> $85,000 - $100,000</div>
+                    </div>
+                    <p class="job-description">
+                        We're looking for a skilled Frontend Developer with experience in React.js to join our growing team. You'll work on building responsive web applications and collaborate with our design team.
+                    </p>
+                    <div class="job-footer">
+                        <div class="job-posted">Posted 2 days ago</div>
+                        <button class="apply-btn" onclick="openApplyModal()">Apply Now</button>
+                    </div>
+                </div>
+                
+                <!-- Job Card 2 -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-company">DataSystems</div>
+                        <div class="job-type">Internship</div>
+                    </div>
+                    <h3 class="job-title">Data Science Intern</h3>
+                    <div class="job-details">
+                        <div class="job-detail"><i class="fas fa-map-marker-alt"></i> Remote</div>
+                        <div class="job-detail"><i class="fas fa-money-bill-wave"></i> $25 - $30/hr</div>
+                    </div>
+                    <p class="job-description">
+                        Summer internship opportunity for data science students. Work with our team on real-world data analysis projects using Python and machine learning libraries.
+                    </p>
+                    <div class="job-footer">
+                        <div class="job-posted">Posted 1 week ago</div>
+                        <button class="apply-btn" onclick="openApplyModal()">Apply Now</button>
+                    </div>
+                </div>
+                
+                <!-- Job Card 3 -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-company">DesignHub</div>
+                        <div class="job-type">Part-time</div>
+                    </div>
+                    <h3 class="job-title">UI/UX Designer</h3>
+                    <div class="job-details">
+                        <div class="job-detail"><i class="fas fa-map-marker-alt"></i> New York, NY</div>
+                        <div class="job-detail"><i class="fas fa-money-bill-wave"></i> $35 - $45/hr</div>
+                    </div>
+                    <p class="job-description">
+                        Seeking a creative UI/UX designer to help redesign our mobile application. Must have experience with Figma and user research methodologies.
+                    </p>
+                    <div class="job-footer">
+                        <div class="job-posted">Posted 3 days ago</div>
+                        <button class="apply-btn" onclick="openApplyModal()">Apply Now</button>
+                    </div>
+                </div>
+                
+                <!-- Job Card 4 -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-company">CloudNine</div>
+                        <div class="job-type">Full-time</div>
+                    </div>
+                    <h3 class="job-title">Backend Engineer</h3>
+                    <div class="job-details">
+                        <div class="job-detail"><i class="fas fa-map-marker-alt"></i> Austin, TX</div>
+                        <div class="job-detail"><i class="fas fa-money-bill-wave"></i> $90,000 - $120,000</div>
+                    </div>
+                    <p class="job-description">
+                        Join our backend team to build scalable cloud infrastructure. Requires experience with Node.js, AWS, and database design. Recent graduates encouraged to apply.
+                    </p>
+                    <div class="job-footer">
+                        <div class="job-posted">Posted 5 days ago</div>
+                        <button class="apply-btn" onclick="openApplyModal()">Apply Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Apply Modal -->
+    <div class="modal" id="applyModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeApplyModal()">&times;</span>
+            <h2 class="modal-title">Apply for Position</h2>
+            <form id="applicationForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" class="form-control" value="John Student" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" class="form-control" value="john.student@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" class="form-control" value="(555) 123-4567" required>
+                </div>
+                <div class="form-group">
+                    <label for="resume">Select Resume</label>
+                    <select id="resume" class="form-control" required>
+                        <option value="">Choose a resume</option>
+                        <option value="resume1.pdf" selected>John_Student_Resume_2025.pdf</option>
+                        <option value="resume2.pdf">John_Student_Resume_Short.pdf</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="coverLetter">Cover Letter (Optional)</label>
+                    <textarea id="coverLetter" class="form-control" rows="4" placeholder="Write a brief cover letter..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Submit Application</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openApplyModal() {
+            document.getElementById('applyModal').style.display = 'flex';
+        }
+        
+        function closeApplyModal() {
+            document.getElementById('applyModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('applyModal');
+            if (event.target == modal) {
+                closeApplyModal();
+            }
+        }
+        
+        // Form submission
+        document.getElementById('applicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Application submitted successfully!');
+            closeApplyModal();
+        });
+    </script>
+</body>
+</html>

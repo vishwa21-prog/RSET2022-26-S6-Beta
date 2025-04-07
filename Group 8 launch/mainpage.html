@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Streamline your career placement with Placement Hire. Connect with the best opportunities easily and efficiently.">
+    <meta name="keywords" content="placement, job, career, students, recruiters, resume analysis, job listings">
+    <title>Main Page | Placement Hire</title>
+    <link rel="stylesheet" href="mainpage.css">
+</head>
+<body>
+    <!-- Logo Section -->
+    <div class="logo-container">
+        <img src="logo1.png" alt="Placement Hire Logo" class="logo">
+    </div>
+
+    <!-- Header with Logo and Navigation -->
+    <header>
+        <img src="logo1.png" alt="Placement Hire Logo" class="header-logo">
+        <div class="nav">
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+                <li><a href="#partner">Partner</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+        <!-- Login Button -->
+        <a href="login_page.html"><button class="btn login-btn" onclick="window.location.href='login.html'">Login</button></a>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Streamlining Your Career Placement</h1>
+        <p>Connecting students with the best opportunities, easily and efficiently. Our platform is designed to bridge the gap between talent and opportunity, offering a seamless experience for both job seekers and recruiters.</p>
+        <div class="cta">
+            <a href="signup.html"><button class="btn">Get Started</button></a>
+            <a href="login_page.html"><button class="btn login-btn" onclick="window.location.href='login.html'">Login</button></a>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <img src="job-listing.png">
+                <h3>Job Listings</h3>
+                <p>Explore opportunities tailored to your skills.</p>
+            </div>
+            <div class="feature-card">
+                <img src="resume-analyzer.png">
+                <h3>Resume Analysis</h3>
+                <p>Get AI-powered feedback on your resume.</p>
+            </div>
+            <div class="feature-card">
+                <img src="notifications.png" >
+                <h3>Notifications</h3>
+                <p>Stay updated with the latest job alerts.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials">
+        <h2>What Our Users Say</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <img src="john.jpeg" alt="John Doe">
+                <p>"This platform made my job search so easy!"</p>
+                <h3>John Doe</h3>
+                <span>Software Engineer</span>
+            </div>
+            <div class="testimonial-card">
+                <img src="jane.jpg" alt="Jane Smith">
+                <p>"Efficient and user-friendly. Highly recommended!"</p>
+                <h3>Jane Smith</h3>
+                <span>Product Manager</span>
+            </div>
+            <div class="testimonial-card">
+                <img src="micheal.png" alt="Michael Brown">
+                <p>"The Quiz feature is a game-changer!"</p>
+                <h3>Michael Brown</h3>
+                <span>Data Scientist</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <h2>About Us</h2>
+        <p>We are dedicated to streamlining the placement process for students and recruiters alike. Our mission is to empower students with the tools and resources they need to succeed in their careers, while helping recruiters find the best talent effortlessly.</p>
+    </section>
+
+    <!-- Partner with Us Section -->
+    <section id="partner" class="partner">
+        <h2>Partner with Us</h2>
+        <p>Join us in building successful careers. Post job openings and connect with talented students.</p>
+        <a href="signup.html"><button class="btn">Become a Partner</button></a>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-grid">
+            <div class="faq-card">
+                <h3>How do I sign up?</h3>
+                <p>Signing up is easy! Click on the "Get Started" button and follow the instructions to create your account.</p>
+            </div>
+            <div class="faq-card">
+                <h3>What is the cost of the service?</h3>
+                <p>Our platform is currently free for students and recruiters</p>
+            </div>
+            <div class="faq-card">
+                <h3>How does resume analysis work?</h3>
+                <p>Our Resume analyser makes use of algorithm for calculating resume scores, it leverages its natural language processing (NLP) and large language model (LLM) capabilities to analyze resumes and job descriptions, providing insights and match scores. .</p>
+            </div>
+            </div>
+            </section>
+            <!-- Call-to-Action Section -->
+<section class="cta-section">
+    <h2>Ready to Take the Next Step?</h2>
+    <p>Join thousands of students and recruiters who are already benefiting from our platform. Start your journey today!</p>
+    <div class="cta-buttons">
+        <a href="signup.html"><button class="btn">Sign Up Now</button></a>
+        
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#partner">Partner</a></li>
+        <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <p>&copy; 2025 launch. All rights reserved.</p>
+</footer>
+
+<!-- Script for Animations -->
+<script>
+    // Feature Card Animation
+    const featureCards = document.querySelectorAll('.feature-card');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    featureCards.forEach(card => {
+        observer.observe(card);
+    });
+
+    // Smooth Scroll for Navigation Links
+    document.querySelectorAll('.nav ul li a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>

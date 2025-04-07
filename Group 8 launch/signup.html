@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Page</title>
+    <link rel="stylesheet" href="signuppage.css">
+
+    <!-- Load Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <h1>Welcome to the Placement Portal</h1>
+            <ul>
+                <li>
+                    <div class="icon">&#10004;</div>
+                    <span class="description">Simplify your placement journey with ease.</span>
+                </li>
+                <li>
+                    <div class="icon">&#10004;</div>
+                    <span class="description">Enhance interaction between students and coordinators.</span>
+                </li>
+                <li>
+                    <div class="icon">&#10004;</div>
+                    <span class="description">Apply for jobs and internships effortlessly.</span>
+                </li>
+            </ul>
+        </div>
+        <div class="right">
+            <div class="form-container">
+                <h2>Create an Account</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="role">Sign up as:</label>
+                        <select id="role" required>
+                            <option value="" disabled selected>Select your role</option>
+                            <option value="student">Student</option>
+                            <option value="pc">Placement Coordinator</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user-name">User name</label>
+                        <input type="text" id="user-name" placeholder="Enter your user name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.edu\.in$" 
+                            title="Please enter a valid .edu email address"
+                            placeholder="Enter your college email" 
+                            required>
+                    </div>                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" id="signup-button" class="button">Sign Up</button>
+                </form>
+                <div class="footer">
+                    Already have an account? <a href="login_page.html">Log in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript: Ensure Supabase is initialized and used correctly -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize Supabase properly
+            const supabaseUrl = 'https://bawhzyetjzkeypszpeqr.supabase.co'; // Replace with your Supabase URL
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg'; // Replace with your actual Supabase key
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey); 
+
+            document.getElementById("signup-form").addEventListener("submit", async function(event) {
+                event.preventDefault(); // Prevent form refresh
+
+                // Get form values
+                const role = document.getElementById("role").value;
+                const username = document.getElementById("user-name").value;
+                const email = document.getElementById("email").value;
+                const password = document.getElementById("password").value;
+
+                // Validate email format using the pattern (only for .edu.in domain)
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.edu+\.in$/;
+                if (!emailPattern.test(email)) {
+                    alert("Please enter a valid email address in the format xyz@collegename.edu.in");
+                    return; // Stop form submission
+                }
+
+                // Validate role selection
+                if (!role) {
+                    alert("Please select a role to proceed.");
+                    return;
+                }
+
+                console.log("Starting signup process...");
+
+                try {
+                    // Step 1: Signup user with Supabase Auth
+                    const { data, error } = await supabase.auth.signUp({
+                        email: email,
+                        password: password
+                    });
+
+                    if (error) {
+                        console.error("Signup error:", error.message);
+                        alert("Signup failed: " + error.message);
+                        return;
+                    }
+
+                    console.log("User created successfully:", data);
+
+                    const userId = data.user?.id; // Get new user's ID
+
+                    if (!userId) {
+                        console.error("No user ID returned from Supabase.");
+                        return;
+                    }
+
+                    console.log("User ID:", userId);
+
+                    // Step 2: Insert user details into "users" table
+                    const { error: dbError } = await supabase.from("users").upsert([ 
+                        { 
+                            id: userId, 
+                            email: email, 
+                            role: role, 
+                            username: username, 
+                            created_at: new Date().toISOString() // Ensure created_at is added if not auto-generated
+                        }
+                    ]);
+
+                    if (dbError) {
+                        console.error("Database insert error:", dbError.message);
+                        alert("Error saving user details: " + dbError.message);
+                        return;
+                    }
+
+                    console.log("User details inserted successfully!");
+
+                    // Step 3: Redirect to the correct page
+                    if (role === "student") {
+                        window.location.href = "student-onboarding.html";
+                    } else if (role === "pc") {
+                        window.location.href = "pc_onboarding.html";
+                    }
+                } catch (err) {
+                    console.error("Unexpected error:", err);
+                    alert("An unexpected error occurred. Please try again.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Coordinator Dashboard | Placement Hire</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --black: #000000;
+            --dark-gray: #111111;
+            --medium-gray: #222222;
+            --light-gray: #333333;
+            --white: #FFFFFF;
+            --yellow: #FFD700;
+            --light-yellow: #FFEEAA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: var(--dark-gray);
+            color: var(--white);
+            min-height: 100vh;
+        }
+
+        /* Sidebar (untouched) */
+        .sidebar {
+            width: 280px;
+            background-color: var(--black);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid var(--light-gray);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-container {
+            padding: 0 2rem 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .sidebar-logo {
+            height: 36px;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 0 1.5rem;
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 10px;
+        }
+
+        .menu-item::before {
+            content: "•";
+            color: var(--white);
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .menu-link:hover {
+            background-color: var(--light-gray);
+            color: var(--yellow);
+        }
+
+        .menu-link.active {
+            background-color: var(--medium-gray);
+            color: var(--yellow);
+            font-weight: 500;
+        }
+
+        .menu-link i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            color: var(--yellow);
+            font-size: 1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem;
+            max-width: 800px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--yellow);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: absolute;
+            right: 3rem;
+            top: 3rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--yellow);
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Minimal Welcome Section */
+        .welcome-section {
+            background-color: var(--medium-gray);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid var(--light-gray);
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--yellow);
+        }
+
+        .welcome-section p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Sleek Job Listing Button */
+        .btn-yellow {
+            background-color: var(--yellow);
+            color: var(--black);
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .btn-yellow:hover {
+            background-color: var(--light-yellow);
+            transform: translateY(-2px);
+        }
+
+        .btn-yellow i {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 2rem;
+            }
+            .user-profile {
+                position: static;
+                margin-left: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <body>
+        <!-- Sidebar Navigation (completely unchanged) -->
+        <div class="sidebar">
+            <div class="logo-container">
+                <img src="logo1.png" alt="Placement Hire Logo" class="sidebar-logo">
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="pc-dashboard.html" class="menu-link active">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="jobs.html" class="menu-link">
+                        <i class="fas fa-plus-circle"></i>
+                        Post Jobs
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="applications.html" class="menu-link">
+                        <i class="fas fa-file-alt"></i>
+                        Review Applications
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="quiz.html" class="menu-link">
+                        <i class="fas fa-question-circle"></i>
+                        Quizzes
+                    </a>
+                </li>
+                <li class="menu-item" style="margin-top: auto;">
+                    <a href="login_page.html" class="menu-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Enhanced Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Placement Coordinator Dashboard</h1>
+            </div>
+            
+            <div class="user-profile">
+                <div class="username" id="coordinatorName">Loading...</div>
+                <div class="user-avatar" id="coordinatorInitials">PC</div>
+            </div>
+            
+            <div class="welcome-section">
+                <h2 id="welcomeMessage">Welcome</h2>
+                <p>Manage your college's placement activities from this dashboard</p>
+                <button class="btn-yellow" onclick="window.location.href='jobs.html'">
+                    <i class="fas fa-plus"></i> Create Job Listing
+                </button>
+            </div>
+        </div>
+
+    <script src="pc-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Coordinator Onboarding</title>
+    <link rel="stylesheet" href="pc_onboarding.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Placement Coordinator Onboarding</h2>
+        <form id="onboarding-form">
+            <!-- Username Field -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="first-name">First Name</label>
+                <input type="text" id="first-name" name="first-name" placeholder="Enter your first name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" id="last-name" name="last-name" placeholder="Enter your last name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contact">Contact Number</label>
+                <div class="contact-input">
+                    <select id="countryCode" name="countryCode" required>
+                        <option value="PIN" disabled selected>PIN</option>
+                        <option value="+1">+1 (USA)</option>
+                        <option value="+44">+44 (UK)</option>
+                        <option value="+91">+91 (India)</option>
+                        <option value="+61">+61 (Australia)</option>
+                    </select>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Your Contact Number" required pattern="\d{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <label for="institutionName">Institution Name</label>
+                <input type="text" id="institutionName" name="institutionName" placeholder="Enter your institution name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department</label>
+                <input type="text" id="department" name="department" placeholder="Enter your department" required>
+            </div>
+
+            <div class="form-group">
+                <label for="yearsOfExperience">Years of Experience</label>
+                <input type="number" id="yearsOfExperience" name="yearsOfExperience" placeholder="Enter years of experience" required min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="educationLevel">Education Level</label>
+                <select id="educationLevel" name="educationLevel" required>
+                    <option value="" disabled selected>Select your education level</option>
+                    <option value="Bachelor's">Bachelor's</option>
+                    <option value="Master's">Master's</option>
+                    <option value="PhD">PhD</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Sign Up</button>
+        </form>
+    </div>
+
+    <script>
+        // Supabase Configuration
+            const supabaseUrl = 'https://bawhzyetjzkeypszpeqr.supabase.co'; 
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg'; // Replace with your actual Supabase key
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Form Submission
+        document.getElementById('onboarding-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            // Get form values
+            const username = document.getElementById('username').value;
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const dob = document.getElementById('dob').value;
+            const countryCode = document.getElementById('countryCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const contactNumber = `${countryCode}${phoneNumber}`;
+            const gender = document.getElementById('gender').value;
+            const institutionName = document.getElementById('institutionName').value;
+            const department = document.getElementById('department').value;
+            const yearsOfExperience = parseInt(document.getElementById('yearsOfExperience').value);
+            const educationLevel = document.getElementById('educationLevel').value;
+
+            // Check if the username exists in the 'users' table
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('username', username)
+                .single();
+
+            if (userError || !userData) {
+                alert('Username does not exist. Please enter a valid username.');
+                return;
+            }
+
+            const userId = userData.id;
+
+            // Insert into placement_coordinator_profiles table
+            const { error: insertError } = await supabase.from('placement_coordinators').insert([
+                {
+                    user_id: userId,
+                    first_name: firstName,
+                    last_name: lastName,
+                    dob: dob,
+                    pin: countryCode,
+                    contact_number: contactNumber,
+                    gender: gender,
+                    institution_name: institutionName,
+                    department: department,
+                    years_of_experience: yearsOfExperience,
+                    education_level: educationLevel,
+                }
+            ]);
+
+            if (insertError) {
+                alert('Error while submitting the form: ' + insertError.message);
+            } else {
+                alert('Placement Coordinator onboarded successfully!');
+                window.location.href = "pc-dashboard.html";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz App - Company Selection</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="studentquiz.css" />
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="logo-container">
+        <img src="logo1.png" alt="CareerConnect Logo" class="logo" />
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="jobsstudentview.html" class="nav-link"><i class="fas fa-briefcase"></i> Job Listings</a></li>
+        <li class="nav-item"><a href="josh.html" class="nav-link"><i class="fas fa-robot"></i> Resume Analysis</a></li>
+        <li class="nav-item"><a href="studentvieequiz.html" class="nav-link active"><i class="fas fa-question-circle"></i> Quizzes</a></li>
+        <li class="nav-item"><a href="application-status.html" class="nav-link"><i class="fas fa-file-alt"></i> Application Status</a></li>
+        <li class="nav-item"><a href="ats.html" class="nav-link"><i class="fas fa-users"></i> ATS (prototype)</a></li>
+        <li class="nav-item"><a href="student-profile.html" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
+        <li class="nav-item" style="margin-top: auto"><a href="mainpage.html" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <h1>Quiz</h1>
+      <div id="company-tabs" class="tab-container"></div>
+      <div id="quiz-container"></div>
+      <button id="submit-btn" onclick="submitAnswers()">Submit Answers <span class="loader" style="display: none;"></span></button>
+      <div id="results-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <span class="close-modal" onclick="closeModal()">×</span>
+          <h2>Quiz Results</h2>
+          <div id="results-summary"></div>
+          <div id="results-details"></div>
+          <button class="modal-close-btn" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+
+      const supabaseClient = supabase.createClient(
+        "https://bawhzyetjzkeypszpeqr.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg"
+      );
+
+      let answers = {};
+      let allQuestions = [];
+      let currentCompany = "General";
+      let isSubmitting = false;
+
+      async function fetchQuestions(companyFilter = "General") {
+        currentCompany = companyFilter;
+        let { data, error } = await supabaseClient.from("quizzes").select("*");
+
+        console.log(data)
+        
+        if (error) {
+          console.error("Error fetching questions:", error);
+          return;
+        }
+
+        const companies = [...new Set(data.map((q) => q.company))];
+        const companyTabs = document.getElementById("company-tabs");
+        companyTabs.innerHTML = companies
+          .map(
+            (company) => `
+        <button class="tab-link ${company === currentCompany ? "active" : ""}" 
+                onclick="fetchQuestions('${company}')">
+          ${company}
+        </button>
+      `
+          )
+          .join("");
+
+        allQuestions = data.filter((q) => q.company === companyFilter);
+        renderQuestions();
+      }
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function renderQuestions() {
+        const container = document.getElementById("quiz-container");
+        container.innerHTML = "";
+        shuffleArray(allQuestions);
+
+        allQuestions.forEach((q) => {
+          const div = document.createElement("div");
+          div.className = "question-block";
+          div.innerHTML = `
+      <p class="question-text"><strong>${q.question}</strong></p>
+      ${currentCompany === "General" ? `<p class="difficulty-text"><i>Difficulty: ${q.difficulty}</i></p>` : ""}
+      <div class="options-container">
+        <label><input type="radio" name="q${q.id}" value="A"> ${q.option_a}</label>
+        <label><input type="radio" name="q${q.id}" value="B"> ${q.option_b}</label>
+        <label><input type="radio" name="q${q.id}" value="C"> ${q.option_c}</label>
+        <label><input type="radio" name="q${q.id}" value="D"> ${q.option_d}</label>
+      </div>
+    `;
+          container.appendChild(div);
+          div.addEventListener("change", (e) => {
+            answers[q.id] = e.target.value;
+          });
+        });
+      }
+
+      async function submitAnswers() {
+        if (isSubmitting || Object.keys(answers).length === 0) {
+          if (!isSubmitting) alert("Please answer at least one question before submitting!");
+          return;
+        }
+
+        isSubmitting = true;
+        const submitBtn = document.getElementById("submit-btn");
+        submitBtn.disabled = true;
+        submitBtn.querySelector(".loader").style.display = "inline-block";
+        submitBtn.querySelector("span").style.marginLeft = "10px";
+
+        const { data: correctAnswers, error } = await supabaseClient
+          .from("quizzes")
+          .select("id, question, correct_answer, option_a, option_b, option_c, option_d, company")
+          .eq("company", currentCompany);
+
+        if (error) {
+          console.error("Error fetching correct answers:", error);
+          isSubmitting = false;
+          submitBtn.disabled = false;
+          submitBtn.querySelector(".loader").style.display = "none";
+          return;
+        }
+
+        const total = correctAnswers.length;
+        let correctCount = 0;
+        let resultsHTML = "";
+
+        correctAnswers.forEach((q) => {
+          const userAnswer = answers[q.id];
+          const isCorrect = userAnswer === q.correct_answer;
+          if (isCorrect) correctCount++;
+
+          resultsHTML += `
+            <div class="result-item ${isCorrect ? 'correct' : 'incorrect'}">
+              <p class="result-question">${q.question}</p>
+              <p class="result-answer">Your Answer: ${userAnswer ? q[`option_${userAnswer.toLowerCase()}`] : 'Not answered'} 
+                ${isCorrect ? '<span class="correct-mark">✓</span>' : '<span class="incorrect-mark">✗</span>'}
+              </p>
+              ${!isCorrect ? `<p class="correct-answer">Correct Answer: ${q[`option_${q.correct_answer.toLowerCase()}`]}</p>` : ''}
+            </div>
+          `;
+        });
+
+        const grade = total > 0 ? ((correctCount / total) * 100).toFixed(2) : 0;
+        
+        document.getElementById("results-summary").innerHTML = `
+          <p class="summary-title">Quiz completed for ${currentCompany}!</p>
+          <p class="summary-score">Score: ${grade}% (${correctCount}/${total} correct)</p>
+        `;
+        document.getElementById("results-details").innerHTML = resultsHTML;
+        document.getElementById("results-modal").style.display = "flex";
+
+        isSubmitting = false;
+        submitBtn.disabled = false;
+        submitBtn.querySelector(".loader").style.display = "none";
+        submitBtn.querySelector("span").style.marginLeft = "0";
+
+        answers = {};
+        fetchQuestions(currentCompany);
+      }
+
+      function closeModal() {
+        document.getElementById("results-modal").style.display = "none";
+      }
+
+      fetchQuestions();
+    </script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+      }
+
+      .sidebar {
+        float: left;
+        width: 250px;
+      }
+
+      .main-content {
+        margin-left: 260px;
+        padding: 20px;
+      }
+
+      .tab-container {
+        display: flex;
+        gap: 10px;
+        padding: 20px 0 0 0;
+        border-bottom: 2px solid #e0e0e0;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .tab-link {
+        padding: 12px 25px;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+      }
+
+      .tab-link.active {
+        background-color: transparent;
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+      }
+
+      #submit-btn {
+        padding: 12px 25px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 30px 0;
+      }
+
+      #submit-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+
+      .loader {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background-color: white;
+        padding: 25px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 650px;
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 30px;
+        cursor: pointer;
+        color: #666;
+      }
+
+      .question-text {
+        margin: 0 0 15px 0;
+        overflow-y: auto;
+        max-height: 80px;
+      }
+
+      .difficulty-text {
+        margin: 0 0 15px 0;
+        color: #666;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .options-container label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        white-space: normal;
+        word-wrap: break-word;
+      }
+
+      .result-item {
+        margin: 25px 0;
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      .correct {
+        background-color: #e6ffe6;
+        border-left: 5px solid #28a745;
+      }
+
+      .incorrect {
+        background-color: #ffe6e6;
+        border-left: 5px solid #dc3545;
+      }
+
+      .correct-mark {
+        color: #28a745;
+        font-weight: bold;
+        margin-left: 10px;
+      }
+
+      .incorrect-mark {
+        color: #dc3545;
+        font-weight: bold;
+        margin-left: 10px;
+      }
+
+      .result-question {
+        margin: 0 0 10px 0;
+        font-weight: 600;
+      }
+
+      .result-answer {
+        margin: 10px 0;
+      }
+
+      .correct-answer {
+        margin: 10px 0;
+        color: #666;
+      }
+
+      .summary-title {
+        font-size: 1.2em;
+        font-weight: 600;
+        margin-bottom: 15px;
+      }
+
+      .summary-score {
+        font-size: 1.1em;
+        color: #333;
+      }
+
+      .modal-close-btn {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+    </style>
+  </body>
+</html>

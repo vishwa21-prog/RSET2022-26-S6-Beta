@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Placement Hire</title>
+    
+    <!-- ✅ FontAwesome for Eye Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+            background: #121212;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #ffc107;
+        }
+
+        .login-container p {
+            font-size: 1rem;
+            color: #ddd;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            color: #ddd;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #ffc107;
+            outline: none;
+        }
+
+        /* Password Field */
+        .password-field {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-field input {
+            width: 100%;
+            padding-right: 40px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            color: #ddd;
+            font-size: 1rem;
+        }
+
+        .password-toggle:hover {
+            color: #ffc107;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #ddd;
+            margin-top: 10px;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ffc107;
+            color: #121212;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #d3d850;
+            transform: translateY(-2px);
+        }
+
+        .signup-link {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        .signup-link a {
+            color: #ffc107;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <p>Welcome back! Please enter your credentials to access your account.</p>
+        <form id="login-form">
+            <!-- Email Field -->
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-field">
+                    <input type="password" id="password-field" name="password" placeholder="Enter your password">
+                    <span id="togglePassword" class="fa fa-eye-slash password-toggle"></span>
+                </div>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" class="login-button">Login</button>
+        </form>
+
+        <!-- Sign Up Link -->
+        <div class="signup-link">
+            Don't have an account? <a href="signup.html">Sign Up</a>
+        </div>
+    </div>
+
+    <script>
+        // ✅ Initialize Supabase
+        const supabaseUrl = 'https://bawhzyetjzkeypszpeqr.supabase.co/';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg';
+
+        document.addEventListener('DOMContentLoaded', function() {
+        window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        // Rest of your code
+        });
+        // ✅ Password Toggle Script
+        document.addEventListener("DOMContentLoaded", function () {
+            const passwordField = document.getElementById("password-field");
+            const togglePassword = document.getElementById("togglePassword");
+
+            if (!passwordField || !togglePassword) {
+                console.error("Password field or toggle button not found!");
+                return;
+            }
+
+            togglePassword.addEventListener("click", function () {
+                console.log("Toggle Clicked!"); // Debugging log
+
+                if (passwordField.type === "password") {
+                    passwordField.type = "text";
+                    togglePassword.classList.remove("fa-eye-slash");
+                    togglePassword.classList.add("fa-eye");
+                } else {
+                    passwordField.type = "password";
+                    togglePassword.classList.remove("fa-eye");
+                    togglePassword.classList.add("fa-eye-slash");
+                }
+            });
+        });
+
+        // ✅ Handle Login Form Submission
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password-field').value;
+
+            // Attempt to log in the user
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                alert("Login failed: " + error.message);
+                return;
+            }
+
+            // ✅ User authenticated successfully
+            const userId = data.user.id;
+
+            // Get user role from Supabase
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('role')
+                .eq('id', userId)
+                .single();
+
+            if (userError || !userData) {
+                alert("Error fetching user role.");
+                return;
+            }
+
+            // ✅ Redirect based on role
+            if (userData.role === 'student') {
+                window.location.href = 'jobsstudentview.html';
+            } else if (userData.role === 'placement_coordinator' || userData.role === 'pc') {
+                window.location.href = 'pc-dashboard.html';
+            } else {
+                alert("Invalid role detected. Contact administrator.");
+            }
+        });
+    </script>
+</body>
+</html>

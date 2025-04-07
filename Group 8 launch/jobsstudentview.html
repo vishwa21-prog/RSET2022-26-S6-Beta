@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>launch | Job Listings</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --black: #000000;
+            --dark-gray: #111111;
+            --medium-gray: #222222;
+            --light-gray: #333333;
+            --white: #FFFFFF;
+            --yellow: #FFD700;
+            --light-yellow: #FFEEAA;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            background-color: var(--white);
+            color: var(--white);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--black);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid var(--light-gray);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-container {
+            padding: 0 2rem 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .logo {
+            height: 36px;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding: 0 1.5rem;
+        }
+        
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--light-gray);
+            color: var(--yellow);
+        }
+        
+        .nav-link.active {
+            background-color: var(--medium-gray);
+            color: var(--yellow);
+            font-weight: 500;
+        }
+        
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            color: var(--yellow);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--black);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-name {
+            color: var(--black);
+            font-weight: 500;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--yellow);
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        /* Job Listings */
+        .job-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .job-card {
+            background-color: var(--medium-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--light-gray);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            border-color: var(--yellow);
+        }
+        
+        .job-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--yellow);
+            margin-bottom: 0.5rem;
+        }
+        
+        .company-name {
+            color: var(--white);
+            opacity: 0.8;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        .job-description {
+            color: var(--white);
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .apply-btn {
+            background-color: var(--yellow);
+            color: var(--black);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        
+        .apply-btn:hover {
+            background-color: var(--light-yellow);
+        }
+        
+        .no-jobs {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--white);
+            opacity: 0.6;
+        }
+        
+        .no-jobs i {
+            font-size: 3rem;
+            color: var(--yellow);
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: var(--yellow);
+            color: var(--black);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification i {
+            margin-right: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="logo1.png" alt="CareerConnect Logo" class="logo">
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="jobsstudentview.html" class="nav-link active">
+                    <i class="fas fa-briefcase"></i>
+                    Job Listings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="josh.html" class="nav-link">
+                    <i class="fas fa-robot"></i>
+                     Resume Analysis
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="studentvieequiz.html" class="nav-link">
+                    <i class="fas fa-question-circle"></i>
+                    Quizzes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="application-status.html" class="nav-link">
+                    <i class="fas fa-file-alt"></i>
+                    Application Status
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="ats.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    ATS (prototype)
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="student-profile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: auto;">
+                <a href="login_page.html" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">Available Positions</h1>
+            <div class="user-profile">
+                <div class="user-name" id="studentName"></div>
+                <div class="user-avatar" id="studentAvatar"></div>
+            </div>
+        </div>
+        
+        <div class="job-list" id="job-list">
+            <!-- Job cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span>Successfully applied to job!</span>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = "https://bawhzyetjzkeypszpeqr.supabase.co";
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg";
+        window.supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        let studentProfileId;
+        let studentResume;
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.querySelector('span').textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Fetch user session
+        async function getSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const userId = session.user.id;
+                const { data: studentData, error: studentError } = await supabase
+                    .from('student_profiles')
+                    .select('id,first_name,last_name,resume')
+                    .eq('user_id', userId)
+                    .single();
+                
+                if (studentError) {
+                    console.error("Error fetching profile:", studentError);
+                    showNotification("Error loading profile data");
+                } else {
+                    studentProfileId = studentData.id;
+                    studentResume = studentData.resume;
+                    
+                    // Set user initials and name
+                    const userAvatar = document.getElementById('studentAvatar');
+                    const userName = document.getElementById('studentName');
+                    
+                    if (studentData.first_name && studentData.last_name) {
+                        // Set initials from first letters of first and last name
+                        userAvatar.textContent = 
+                            studentData.first_name.charAt(0).toUpperCase() + 
+                            studentData.last_name.charAt(0).toUpperCase();
+                        
+                        // Set full name
+                        userName.textContent = 
+                            studentData.first_name + ' ' + studentData.last_name;
+                    } else if (session.user.email) {
+                        // Fallback to email if name not available
+                        userAvatar.textContent = session.user.email.charAt(0).toUpperCase();
+                        userName.textContent = session.user.email;
+                    }
+                }
+            } else {
+                window.location.href = "login_page.html";
+            }
+        }
+
+        // Fetch jobs
+        async function getJobs() {
+            const { data: jobs, error } = await supabase
+                .from('jobs')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error("Error fetching jobs:", error);
+                showNotification("Error loading jobs");
+            } else {
+                displayJobs(jobs);
+            }
+        }
+
+        // Display jobs
+        function displayJobs(jobs) {
+            const jobListDiv = document.getElementById("job-list");
+            jobListDiv.innerHTML = '';
+            
+            if (jobs.length === 0) {
+                jobListDiv.innerHTML = `
+                    <div class="no-jobs">
+                        <i class="fas fa-briefcase"></i>
+                        <h3>No positions available</h3>
+                        <p>Check back later for new opportunities</p>
+                    </div>
+                `;
+            } else {
+                jobs.forEach(job => {
+                    const jobCard = document.createElement("div");
+                    jobCard.className = "job-card";
+                    jobCard.innerHTML = `
+                        <h3 class="job-title">${job.title}</h3>
+                        <p class="company-name">${job.company_name}</p>
+                        <p class="job-description">${job.description}</p>
+                        <button class="apply-btn" onclick="applyToJob('${job.id}')">Apply Now</button>
+                    `;
+                    jobListDiv.appendChild(jobCard);
+                });
+            }
+        }
+
+        // Apply to job
+        async function applyToJob(jobId) {
+            if (!studentProfileId) {
+                showNotification("Please login to apply");
+                return;
+            }
+
+            // Check for existing application
+            const { data: existingApplications, error: checkError } = await supabase
+                .from('applications')
+                .select('id')
+                .eq('student_profile_id', studentProfileId)
+                .eq('job_id', jobId);
+
+            if (checkError) {
+                console.error("Application check error:", checkError);
+                showNotification("Application error");
+                return;
+            }
+
+            if (existingApplications.length > 0) {
+                showNotification("You've already applied to this position");
+                return;
+            }
+
+            // Submit application
+            const { error } = await supabase
+                .from('applications')
+                .insert([{
+                    job_id: jobId,
+                    student_profile_id: studentProfileId,
+                    resumeurl: studentResume,
+                    status: 'applied'
+                }]);
+
+            if (error) {
+                console.error("Application error:", error);
+                showNotification("Application failed");
+            } else {
+                showNotification("Application submitted successfully");
+            }
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", async () => {
+            await getSession();
+            await getJobs();
+        });
+    </script>
+</body>
+</html>

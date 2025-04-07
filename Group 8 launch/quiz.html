@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Creation | Placement Hire</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+    <style>
+      /* Modern Black/White/Yellow Theme */
+      :root {
+        --primary-black: #1a1a1a;
+        --primary-yellow: #ffcc00;
+        --primary-white: #ffffff;
+        --light-gray: #f5f5f5;
+        --medium-gray: #e0e0e0;
+        --dark-gray: #333333;
+        --text-dark: #2c3e50;
+        --text-light: #7f8c8d;
+      }
+
+      /* Base Styles */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--primary-white);
+        color: var(--text-dark);
+        line-height: 1.6;
+      }
+
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar - Black with Yellow Accents */
+      .sidebar {
+        width: 250px;
+        background-color: var(--primary-black);
+        color: var(--primary-white);
+        padding: 0;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar-header {
+        padding: 25px 20px;
+        border-bottom: 1px solid rgba(255, 204, 0, 0.2);
+        text-align: center;
+      }
+
+      .sidebar-logo {
+        max-width: 70%;
+        height: auto;
+        margin-bottom: 15px;
+      }
+
+      .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-yellow);
+        letter-spacing: 0.5px;
+      }
+
+      .sidebar-menu {
+        padding: 15px 0;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 25px;
+        margin: 5px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--primary-white);
+        text-decoration: none;
+        font-size: 0.95rem;
+        border-left: 4px solid transparent;
+      }
+
+      .menu-item:hover {
+        background-color: rgba(255, 204, 0, 0.1);
+        color: var(--primary-yellow);
+      }
+
+      .menu-item.active {
+        background-color: rgba(255, 204, 0, 0.2);
+        border-left: 4px solid var(--primary-yellow);
+        color: var(--primary-yellow);
+        font-weight: 600;
+      }
+
+      .menu-item i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+        font-size: 1rem;
+      }
+
+      /* Main Content Area - Clean White */
+      .main-content {
+        flex: 1;
+        padding: 30px;
+        background-color: var(--primary-white);
+      }
+
+      /* Header - Minimalist Design */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--medium-gray);
+      }
+
+      .page-title {
+        margin: 0;
+        color: var(--primary-black);
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
+
+      .page-title i {
+        color: var(--primary-yellow);
+        margin-right: 10px;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-yellow);
+        color: var(--primary-black);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 12px;
+        font-size: 0.9rem;
+      }
+
+      /* Quiz Creation Form */
+      .quiz-form-container {
+        background-color: var(--primary-white);
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+        border: 1px solid var(--medium-gray);
+      }
+
+      .section-title {
+        color: var(--primary-black);
+        font-size: 1.4rem;
+        margin-top: 0;
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--primary-yellow);
+        font-weight: 600;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-dark);
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--medium-gray);
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border 0.3s;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary-yellow);
+        box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.2);
+      }
+
+      .options-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .option-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .option-radio {
+        margin-right: 10px;
+        accent-color: var(--primary-yellow);
+        transform: scale(1.2);
+      }
+
+      /* Buttons - Yellow and Black Theme */
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        font-size: 1rem;
+      }
+
+      .btn i {
+        margin-right: 8px;
+        font-size: 1rem;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-yellow);
+        color: var(--primary-black);
+      }
+
+      .btn-primary:hover {
+        background-color: #e6b800;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-block {
+        display: block;
+        width: 100%;
+      }
+
+      /* Recent Activity - Minimalist Design */
+      .recent-activity {
+        background-color: var(--primary-white);
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--medium-gray);
+      }
+
+      .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .activity-item {
+        padding: 15px 0;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        align-items: center;
+        transition: all 0.3s;
+      }
+
+      .activity-item:hover {
+        background-color: rgba(255, 204, 0, 0.05);
+      }
+
+      .activity-item:last-child {
+        border-bottom: none;
+      }
+
+      .activity-icon {
+        width: 32px;
+        height: 32px;
+        background-color: var(--primary-yellow);
+        color: var(--primary-black);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+
+      .activity-text {
+        flex: 1;
+        font-size: 0.95rem;
+      }
+
+      .activity-time {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        min-width: 80px;
+        text-align: right;
+      }
+
+      /* Notification Styles */
+      .notification {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--primary-yellow);
+        color: var(--primary-black);
+        padding: 15px 25px;
+        border-radius: 4px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.4s ease;
+      }
+
+      .notification.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .notification i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 768px) {
+        .dashboard-container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          height: auto;
+        }
+
+        .main-content {
+          padding: 20px;
+        }
+
+        .options-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <img src="logo1.png" alt="Logo" class="sidebar-logo" />
+          <div class="sidebar-title">Placement Coordinator</div>
+        </div>
+
+        <div class="sidebar-menu">
+          <div
+            class="menu-item"
+            onclick="window.location.href='pc-dashboard.html'"
+          >
+            <i class="fas fa-tachometer-alt"></i>
+            <span class="menu-text">Dashboard</span>
+          </div>
+          <div class="menu-item" onclick="window.location.href='jobs.html'">
+            <i class="fas fa-plus-circle"></i>
+            <span class="menu-text">Post Jobs</span>
+          </div>
+          <div
+            class="menu-item"
+            onclick="window.location.href='applications.html'"
+          >
+            <i class="fas fa-clipboard-check"></i>
+            <span class="menu-text">Review Apps</span>
+            <span class="notification-bubble"></span>
+          </div>
+          <div
+            class="menu-item active"
+            onclick="window.location.href='quiz.html'"
+          >
+            <i class="fas fa-question-circle"></i>
+            <span class="menu-text">Quizzes</span>
+          </div>
+          <div
+            class="menu-item"
+            id="logoutBtn"
+            onclick="window.location.href='login_page.html'"
+          >
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="menu-text">Logout</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="header">
+          <h1 class="page-title">
+            <i class="fas fa-question-circle"></i> Quiz Creation
+          </h1>
+          <div class="user-profile">
+            <div class="user-avatar">PC</div>
+          </div>
+        </div>
+
+        <div class="quiz-form-container">
+          <h2 class="section-title">
+            <i class="fas fa-plus-circle"></i> Add New Question
+          </h2>
+
+          <!-- Company Name Input -->
+          <div class="form-group">
+            <label for="company">Company Name</label>
+            <input
+              type="text"
+              id="company"
+              class="form-control"
+              placeholder="Enter company name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="question">Question</label>
+            <input
+              type="text"
+              id="question"
+              class="form-control"
+              placeholder="Enter the question text"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Options</label>
+            <div class="options-grid">
+              <div class="option-item">
+                <input type="radio" name="correct_option" value="A" checked />
+                <input
+                  type="text"
+                  id="option_a"
+                  class="form-control"
+                  placeholder="Option A"
+                />
+              </div>
+              <div class="option-item">
+                <input type="radio" name="correct_option" value="B" />
+                <input
+                  type="text"
+                  id="option_b"
+                  class="form-control"
+                  placeholder="Option B"
+                />
+              </div>
+              <div class="option-item">
+                <input type="radio" name="correct_option" value="C" />
+                <input
+                  type="text"
+                  id="option_c"
+                  class="form-control"
+                  placeholder="Option C"
+                />
+              </div>
+              <div class="option-item">
+                <input type="radio" name="correct_option" value="D" />
+                <input
+                  type="text"
+                  id="option_d"
+                  class="form-control"
+                  placeholder="Option D"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="difficulty">Difficulty</label>
+            <select id="difficulty" class="form-control">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+
+          <button
+            id="add-question-btn"
+            class="btn btn-primary btn-block"
+            onclick="addQuestion()"
+          >
+            <i class="fas fa-plus"></i> Add Question
+          </button>
+        </div>
+
+        <!-- CSV Upload Section -->
+        <div id="upload-section" class="section">
+          <div class="csv-upload-container">
+            <h2 class="section-title">
+                <i class="fas fa-file-upload"></i> Upload CSV File
+            </h2>
+            <input type="file" id="csvFileInput" accept=".csv">
+            <button id="uploadCSVButton">
+                <i class="fas fa-upload"></i> Upload CSV
+            </button>
+        </div>
+          <!-- Upload section content -->
+      </div>
+        
+      
+      
+      </div>
+    </div>
+
+    <!-- Notification Element -->
+    <div id="notification" class="notification">
+      <i class="fas fa-check-circle"></i>
+      <span id="notification-message">Question added successfully!</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+      // Initialize Supabase
+     // Initialize Supabase
+     const { createClient } = supabase;
+     const supabaseClient = createClient(
+    "https://bawhzyetjzkeypszpeqr.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg"
+);
+     
+
+// Function to show notifications
+function showNotification(message, duration = 3000) {
+    const notification = document.getElementById("notification");
+    const notificationMessage = document.getElementById("notification-message");
+
+    notificationMessage.textContent = message;
+    notification.classList.add("show");
+
+    setTimeout(() => {
+        notification.classList.remove("show");
+    }, duration);
+}
+
+// Function to switch sections based on sidebar clicks
+function showSection(sectionId) {
+    document.querySelectorAll(".section").forEach(section => {
+        section.style.display = "none";
+    });
+
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.style.display = "block";
+    } else {
+        console.error(`Error: Section '${sectionId}' not found.`);
+    }
+}
+
+
+// Show default section when page loads
+document.addEventListener("DOMContentLoaded", () => {
+    showSection("upload-section");
+});
+
+// Function to upload CSV file and parse data
+async function uploadCSV() {
+    console.log("CSV upload function called!");
+
+    const input = document.getElementById("csvFile");
+    if (!input) {
+        console.error("Error: File input element not found.");
+        return;
+    }
+
+    const file = input.files[0]; 
+    if (!file) {
+        showNotification("No file selected", 3000);
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+        const csvText = e.target.result;
+
+        // Parse CSV
+        const parsedData = Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            trimHeaders: true,
+        }).data;
+
+        console.log("Parsed Data:", parsedData);
+
+        // Map and clean data
+        const cleanedData = parsedData.map((row) => ({
+            company: row["Company"]?.trim() || "Unknown",
+            question: row["Question"]?.trim() || "Missing Question",
+            option_a: row["A"]?.trim() || "Missing A",
+            option_b: row["B"]?.trim() || "Missing B",
+            option_c: row["C"]?.trim() || "Missing C",
+            option_d: row["D"]?.trim() || "Missing D",
+            correct_answer: row["Answer"]?.trim().toUpperCase() || "Missing Answer",
+            difficulty: row["Difficulty"]?.trim().toLowerCase() || "unknown",
+        }));
+
+        console.log("Final Mapped Data:", cleanedData);
+
+        if (cleanedData.length === 0) {
+            console.error("No valid questions found.");
+            return;
+        }
+
+        // Upload to Supabase
+        const { error } = await supabaseClient.from("quizzes").insert(cleanedData);
+        if (error) {
+            console.error("Error uploading CSV:", error.message);
+            showNotification("Error uploading CSV: " + error.message, 3000);
+        } else {
+            console.log("CSV uploaded successfully!");
+            showNotification("CSV uploaded successfully!", 3000);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+// Function to manually add a question
+async function addQuestion() {
+    const companyInput = document.getElementById("company");
+    const questionInput = document.getElementById("question");
+
+    if (!companyInput || !questionInput) {
+        console.error("Form elements not found!");
+        return;
+    }
+
+    const company = companyInput.value.trim();
+    const question = questionInput.value.trim();
+    const option_a = document.getElementById("option_a").value.trim();
+    const option_b = document.getElementById("option_b").value.trim();
+    const option_c = document.getElementById("option_c").value.trim();
+    const option_d = document.getElementById("option_d").value.trim();
+    const correct_answer = document.querySelector('input[name="correct_option"]:checked')?.value;
+    const difficulty = document.getElementById("difficulty").value;
+
+    if (!company || !question || !option_a || !option_b || !option_c || !option_d || !correct_answer) {
+        showNotification("Please fill in all fields", 3000);
+        return;
+    }
+
+    const { error } = await supabaseClient.from("quizzes").insert([
+        {
+            company,
+            question,
+            option_a,
+            option_b,
+            option_c,
+            option_d,
+            correct_answer,
+            difficulty,
+        },
+    ]);
+
+    if (error) {
+        showNotification("Error adding question: " + error.message, 3000);
+    } else {
+        showNotification("Question added successfully!", 3000);
+
+        // Clear input fields after successful submission
+        companyInput.value = "";
+        questionInput.value = "";
+        document.getElementById("option_a").value = "";
+        document.getElementById("option_b").value = "";
+        document.getElementById("option_c").value = "";
+        document.getElementById("option_d").value = "";
+        document.getElementById("difficulty").value = "easy";
+    }
+}
+
+
+   
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM fully loaded and parsed");
+    
+    const fileInput = document.getElementById("csvFileInput");
+    const uploadButton = document.getElementById("uploadCSVButton");
+
+    if (fileInput) {
+        fileInput.addEventListener("change", function () {
+            uploadCSV(fileInput);
+        });
+    } else {
+        console.error("Error: File input element not found.");
+    }
+
+    if (uploadButton) {
+        uploadButton.addEventListener("click", function () {
+            uploadCSV(fileInput);
+        });
+    } else {
+        console.error("Error: Upload button not found.");
+    }
+});
+
+// Function to fetch and display questions
+async function fetchQuestions() {
+    const questionsList = document.getElementById("questions-list");
+    questionsList.innerHTML = "<p>Loading...</p>";
+
+    const { data, error } = await supabaseClient.from("quizzes").select("*");
+
+    if (error) {
+        console.error("Error fetching questions:", error.message);
+        questionsList.innerHTML = "<p>Error loading questions.</p>";
+        return;
+    }
+
+    if (data.length === 0) {
+        questionsList.innerHTML = "<p>No questions available.</p>";
+        return;
+    }
+
+    questionsList.innerHTML = "";
+    data.forEach((question) => {
+        const questionElement = document.createElement("div");
+        questionElement.classList.add("question-item");
+        questionElement.innerHTML = `
+            <p><strong>${question.company}:</strong> ${question.question}</p>
+            <ul>
+                <li>A: ${question.option_a}</li>
+                <li>B: ${question.option_b}</li>
+                <li>C: ${question.option_c}</li>
+                <li>D: ${question.option_d}</li>
+            </ul>
+            <p><strong>Correct Answer:</strong> ${question.correct_answer}</p>
+            <p><strong>Difficulty:</strong> ${question.difficulty}</p>
+            <hr>
+        `;
+        questionsList.appendChild(questionElement);
+    });
+}
+async function uploadCSV(inputElement) {
+    console.log("CSV upload function called!");
+
+    if (!inputElement) {
+        console.error("Error: File input element not found.");
+        return;
+    }
+
+    const file = inputElement.files[0];
+    if (!file) {
+        console.log("No file selected.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+        const csvText = e.target.result;
+
+        // Parse CSV
+        const parsedData = Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            trimHeaders: true,
+        }).data;
+
+        console.log("Parsed Data:", parsedData);
+
+        // Map and clean data
+        const cleanedData = parsedData.map((row) => ({
+            company: row["Company"]?.trim() || "Unknown",
+            question: row["Question"]?.trim() || "Missing Question",
+            option_a: row["A"]?.trim() || "Missing A",
+            option_b: row["B"]?.trim() || "Missing B",
+            option_c: row["C"]?.trim() || "Missing C",
+            option_d: row["D"]?.trim() || "Missing D",
+            correct_answer: row["Answer"]?.trim().toUpperCase() || "Missing Answer",
+            difficulty: row["Difficulty"]?.trim().toLowerCase() || "unknown",
+        }));
+
+        console.log("Final Mapped Data:", cleanedData);
+
+        if (cleanedData.length === 0) {
+            console.error("No valid questions found.");
+            showNotification("No valid questions to upload.", 3000);
+            return;
+        }
+
+        // ✅ Insert into Supabase
+        const { data, error } = await supabaseClient
+            .from("quizzes")
+            .insert(cleanedData)
+            .select(); // Optional: returns inserted rows
+
+        if (error) {
+            console.error("❌ Error inserting into Supabase:", error.message);
+            showNotification("Error uploading CSV: " + error.message, 3000);
+        } else {
+            console.log("✅ CSV uploaded successfully!", data);
+            showNotification("CSV uploaded successfully!", 3000);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+
+
+// // Fetch questions when "View Questions" section is shown
+// document.addEventListener("DOMContentLoaded", function () {
+//     const viewQuestionsButton = document.querySelector('[onclick="showSection(\'view-questions-section\')"]');
+//     if (viewQuestionsButton) {
+//         viewQuestionsButton.addEventListener("click", fetchQuestions);
+//     } else {
+//         console.error("Error: View Questions button not found.");
+//     }
+// });
+
+    </script>
+  </body>
+</html>

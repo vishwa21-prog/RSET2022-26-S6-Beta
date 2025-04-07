@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Application Status</title>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+        <link rel="stylesheet" href="application-status.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <style>
+            /* Add this style to your existing CSS */
+            .user-profile {
+                display: flex;
+                align-items: center;
+                flex-direction: row-reverse; /* This reverses the order */
+                gap: 10px; /* Adds space between elements */
+            }
+            
+            .username {
+                color: var(--black);
+                font-weight: 500;
+            }
+            
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: var(--yellow);
+                color: var(--black);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+            }
+        </style>
+    </head>
+    
+<body>
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="logo1.png" alt="CareerConnect Logo" class="logo">
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="jobsstudentview.html" class="nav-link ">
+                    <i class="fas fa-briefcase"></i>
+                    Job Listings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="josh.html" class="nav-link">
+                    <i class="fas fa-robot"></i>
+                     Resume Analysis
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="studentvieequiz.html" class="nav-link">
+                    <i class="fas fa-question-circle"></i>
+                    Quizzes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="application-status.html" class="nav-link active">
+                    <i class="fas fa-file-alt"></i>
+                    Application Status
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="ats.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    ATS (prototype)
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="student-profile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: auto;">
+                <a href="login_page.html" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">Application Status</h1>
+            <div class="user-profile">
+                <div class="user-avatar" id="userAvatar">JS</div>
+                <div class="username" id="userName">Loading...</div>
+            </div>
+        </div>
+        <ul id="applications-list"></ul>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://bawhzyetjzkeypszpeqr.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey); 
+
+        async function fetchUserData() {
+            try {
+                const { data: { user }, error: sessionError } = await supabase.auth.getUser();
+                if (sessionError || !user) {
+                    console.error("Error fetching user session", sessionError);
+                    return;
+                }
+                
+                // Get student profile data
+                const { data: studentData, error: studentError } = await supabase
+                    .from('student_profiles')
+                    .select('first_name, last_name')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (studentError || !studentData) {
+                    console.error("Error fetching student profile", studentError);
+                    return;
+                }
+
+                // Set avatar initials and name
+                const avatarElement = document.getElementById('userAvatar');
+                const nameElement = document.getElementById('userName');
+                
+                if (studentData.first_name && studentData.last_name) {
+                    const initials = studentData.first_name.charAt(0).toUpperCase() + 
+                                   studentData.last_name.charAt(0).toUpperCase();
+                    avatarElement.textContent = initials;
+                    nameElement.textContent = `${studentData.first_name} ${studentData.last_name}`;
+                } else if (user.email) {
+                    // Fallback to email if names not available
+                    avatarElement.textContent = user.email.charAt(0).toUpperCase();
+                    nameElement.textContent = user.email;
+                }
+            } catch (err) {
+                console.error("Unexpected error in fetchUserData:", err);
+            }
+        }
+
+        async function fetchApplications() {
+            try {
+                const { data: { user }, error: sessionError } = await supabase.auth.getUser();
+                if (sessionError || !user) {
+                    console.error("Error fetching user session", sessionError);
+                    return;
+                }
+                const authUserId = user.id;
+                const { data: studentData, error: studentError } = await supabase
+                    .from("student_profiles")
+                    .select("id")
+                    .eq("user_id", authUserId)
+                    .single();
+                if (studentError || !studentData) {
+                    console.error("Error fetching student profile", studentError);
+                    return;
+                }
+                const studentProfileId = studentData.id;
+                const { data: applications, error: appError } = await supabase
+                    .from("applications")
+                    .select("job_id, status, jobs(title, company_name, description)")
+                    .eq("student_profile_id", studentProfileId);
+                if (appError) {
+                    console.error("Error fetching applications", appError);
+                    return;
+                }
+                const list = document.getElementById("applications-list");
+                list.innerHTML = "";
+                applications.forEach(app => {
+                    if (app.jobs) {
+                        const li = document.createElement("li");
+                        li.classList.add("retrieved-job");
+                        li.textContent = `Job: ${app.jobs.title}, Company: ${app.jobs.company_name}, Status: ${app.status}`;
+                        list.appendChild(li);
+                    }
+                });
+
+            } catch (err) {
+                console.error("Unexpected error:", err);
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchUserData();
+            fetchApplications();
+        });
+    </script>
+</body>
+</html>

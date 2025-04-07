@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile | Placement Hire</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="student-profile.css"> 
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="logo1.png" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-title">Placement Coordinator</div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-view="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="menu-text">Dashboard</span>
+                </div>
+                <div class="menu-item" onclick="window.location.href='jobs.html'">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="menu-text">Post Jobs</span>
+                </div>
+                <div class="menu-item" onclick="window.location.href='applications.html'">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span class="menu-text">Review Apps</span>
+                    <span class="notification-bubble">12</span>
+                </div>
+                <div class="menu-item" onclick="window.location.href='quiz.html'">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="menu-text">Quizzes</span>
+                </div>
+                <div class="menu-item" id="logoutBtn" onclick="window.location.href='mainpage.html'">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="menu-text">Logout</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Placement Cordinator Profile</h1>
+                <div class="user-profile">
+                    <div class="user-avatar" id="userInitials">US</div>
+                    <div class="username" id="username">Loading...</div>
+                </div>
+            </div>
+            
+            <div class="profile-container">
+                <div class="profile-header">
+                    <h2 class="profile-title">Personal Information</h2>
+                    <div class="profile-actions">
+                        <button id="editBtn" class="btn btn-primary">Edit Profile</button>
+                        <button id="saveBtn" class="btn btn-primary" style="display: none;">
+                            <span id="saveText">Save Changes</span>
+                            <div id="saveSpinner" class="spinner" style="display: none;"></div>
+                        </button>
+                        <button id="cancelBtn" class="btn btn-secondary" style="display: none;">Cancel</button>
+                    </div>
+                </div>
+                
+                <form id="profileForm">
+                    <!-- Personal Information Section -->
+                    <div class="profile-section">
+                        <h3 class="section-title">Basic Details</h3>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" class="form-control" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" class="form-control" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="dob">Date of Birth</label>
+                                <input type="date" id="dob" class="form-control" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" class="form-control" disabled>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                    <option value="prefer-not-to-say">Prefer not to say</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactNumber">Contact Number</label>
+                                <div class="input-group">
+                                    <select id="countryCode" class="form-control" style="max-width: 100px;">
+                                        <option value="+91">+91</option>
+                                        <option value="+1">+1</option>
+                                        <option value="+44">+44</option>
+                                        <option value="+61">+61</option>
+                                        <option value="+81">+81</option>
+                                        <!-- Add more country codes as needed -->
+                                    </select>
+                                    <input type="text" id="contactNumber" class="form-control" placeholder="Enter number">
+                                </div>
+                            </div>                            
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- Education Information Section -->
+                    <div class="profile-section">
+                        <h3 class="section-title">Education Details</h3>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label for="institutionName">Institution Name</label>
+                                <input type="text" id="institutionName" class="form-control" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="educationLevel">Education Level</label>
+                                <select id="educationLevel" class="form-control" disabled>
+                                    <option value="high-school">High School</option>
+                                    <option value="associate">Associate Degree</option>
+                                    <option value="bachelor">Bachelor's Degree</option>
+                                    <option value="master">Master's Degree</option>
+                                    <option value="phd">PhD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="Department">Department Name</label>
+                                <input type="text" id="Department" class="form-control" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="yoe">Years Of Experience</label>
+                                <input type="number" id="yoe" step="0.01" min="0" max="4" class="form-control" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client (replace with your actual credentials)
+        const supabaseUrl = "https://bawhzyetjzkeypszpeqr.supabase.co"; // Replace with your Supabase URL
+        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg"; // Replace with your Supabase anon key
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    
+        // DOM Elements
+        const editBtn = document.getElementById('editBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const profileForm = document.getElementById('profileForm');
+        const saveText = document.getElementById('saveText');
+        const saveSpinner = document.getElementById('saveSpinner');
+        const userInitials = document.getElementById('userInitials');
+        const usernameDisplay = document.getElementById('username');
+        const formControls = document.querySelectorAll('.form-control');
+    
+        // Show notification
+        function showNotification(message, isSuccess = true) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+    
+        // Get current user ID from Supabase auth
+        async function getCurrentUserId() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error) throw error;
+                return user?.id;
+            } catch (error) {
+                console.error('Error getting user:', error);
+                showNotification('Error getting user session', false);
+                return null;
+            }
+        }
+    
+        async function logout() {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                console.error("Logout failed:", error.message);
+            } else {
+                console.log("User logged out successfully");
+                window.location.href = "login.html"; // Redirect to login page after logout
+            }
+        }
+    
+        // Load profile data from Supabase
+        async function loadProfileData() {
+            const userId = await getCurrentUserId();
+            if (!userId) {
+                showNotification('Please log in to view your profile', false);
+                window.location.href = 'mainpage.html';
+                return;
+            }
+    
+            try {
+                const { data, error } = await supabase
+                    .from('placement_coordinators')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .single();
+    
+                if (error) throw error;
+    
+                if (data) {
+                    // Set form values
+                    document.getElementById('firstName').value = data.first_name || '';
+                    document.getElementById('lastName').value = data.last_name || '';
+                    document.getElementById('dob').value = data.dob || '';
+                    document.getElementById('countryCode').value = data.pin || '';
+                    document.getElementById('contactNumber').value = data.contact_number || '';
+                    document.getElementById('institutionName').value = data.institution_name || '';
+                    document.getElementById('experience').value = data.years_of_experience || '';
+
+                    
+                    // Set gender
+                    const genderSelect = document.getElementById('gender');
+                    if (data.gender) {
+                        genderSelect.value = data.gender;
+                    }
+    
+                    // Set education level
+                    const educationSelect = document.getElementById('educationLevel');
+                    if (data.education_level) {
+                        educationSelect.value = data.education_level;
+                    }
+    
+                    // Set user display info
+                    const firstNameInitial = data.first_name?.charAt(0) || '';
+                    const lastNameInitial = data.last_name?.charAt(0) || '';
+                    userInitials.textContent = (firstNameInitial + lastNameInitial) || 'US';
+                    usernameDisplay.textContent = `${data.first_name || 'User'} ${data.last_name || ''}`.trim();
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showNotification('Error loading profile data', false);
+            }
+        }
+    
+        // Enable form editing
+        function enableEditing() {
+            formControls.forEach(control => {
+                control.disabled = false;
+            });
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+            cancelBtn.style.display = 'inline-block';
+        }
+    
+        // Disable form editing
+        function disableEditing() {
+            formControls.forEach(control => {
+                control.disabled = true;
+            });
+            editBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
+            loadProfileData(); // Reset to original data
+        }
+    
+        // Validate form data
+        function validateForm() {
+            const requiredFields = [
+                'firstName', 'lastName', 'dob', 'gender', 
+                'institutionName', 'educationLevel', 'yearOfStudy'
+            ];
+    
+            for (const fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    showNotification(`Please fill in ${field.labels[0].textContent}`, false);
+                    field.focus();
+                    return false;
+                }
+            }
+    
+            // Validate GPA
+            const gpa = parseFloat(document.getElementById('gpa').value);
+            if (isNaN(gpa)) {
+                showNotification('Please enter a valid GPA', false);
+                return false;
+            }
+    
+            return true;
+        }
+    
+        // Save profile data to Supabase
+        async function saveProfileData() {
+            if (!validateForm()) return;
+    
+            const userId = await getCurrentUserId();
+            if (!userId) {
+                showNotification('Please log in to save your profile', false);
+                return;
+            }
+    
+            // Show loading state
+            saveText.style.display = 'none';
+            saveSpinner.style.display = 'block';
+            saveBtn.disabled = true;
+    
+            try {
+                const updatedData = {
+                    first_name: document.getElementById('firstName').value.trim(),
+                    last_name: document.getElementById('lastName').value.trim(),
+                    dob: document.getElementById('dob').value,
+                    gender: document.getElementById('gender').value,
+                    pin: document.getElementById('countryCode').value.trim(),
+                    contact_number: document.getElementById('contactNumber').value.trim(),
+                    institution_name: document.getElementById('institutionName').value.trim(),
+                    education_level: document.getElementById('educationLevel').value,
+                    years_of_experience: document.getElementById('experience').value.trim(),
+                    updated_at: new Date().toISOString()
+                };
+    
+                // Check if profile exists
+                const { data: existingProfile, error: fetchError } = await supabase
+                    .from('placement_coordinators')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .single();
+    
+                let upsertError;
+                if (existingProfile) {
+                    // Update existing profile
+                    const { error } = await supabase
+                        .from('placement_coordinators')
+                        .update(updatedData)
+                        .eq('user_id', userId);
+                    upsertError = error;
+                } else {
+                    // Create new profile
+                    const { error } = await supabase
+                        .from('placement_coordinators')
+                        .insert([{ ...updatedData, user_id: userId }]);
+                    upsertError = error;
+                }
+    
+                if (upsertError) throw upsertError;
+    
+                showNotification('Profile updated successfully!');
+                disableEditing();
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                showNotification(`Error saving profile: ${error.message}`, false);
+            } finally {
+                // Reset button state
+                saveText.style.display = 'inline-block';
+                saveSpinner.style.display = 'none';
+                saveBtn.disabled = false;
+            }
+        }
+    
+        // Event Listeners
+        editBtn.addEventListener('click', enableEditing);
+        cancelBtn.addEventListener('click', disableEditing);
+        saveBtn.addEventListener('click', saveProfileData);
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveProfileData();
+        });
+    
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProfileData();
+        });
+
+         // Set gender
+        const genderSelect = document.getElementById('gender');
+        if (data.gender) {
+            genderSelect.value = data.gender; // Set the dropdown value
+        }
+
+        // Set education level
+        const educationSelect = document.getElementById('educationLevel');
+        if (data.education_level) {
+            educationSelect.value = data.education_level; // Set the dropdown value
+        }
+        const countryCode = document.getElementById("countryCode").value;
+const phoneNumber = document.getElementById("contactNumber").value;
+const fullPhoneNumber = countryCode + phoneNumber;
+console.log(fullPhoneNumber); // Example: +911234567890
+    </script>
+</body>
+</html>
