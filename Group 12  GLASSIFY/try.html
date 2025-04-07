@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLASSIFY - Virtual Try-On</title>
+  <link rel="icon" type="image/png" href="sun.jpg">
+  <style>
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      background: 
+        linear-gradient(rgba(15, 12, 41, 0.85), rgba(48, 43, 99, 0.85)),
+        url('imagea.jpg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+    }
+
+    #header {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    #nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      padding: 8px 15px;
+      border-radius: 20px;
+      transition: background 0.3s;
+      font-weight: 500;
+    }
+
+    #nav a:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    #canvas-wrapper {
+      position: relative;
+      width: 640px;
+      height: 480px;
+      margin: 20px auto;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+    }
+
+    #video, #uploaded-image {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 5;
+      display: none;
+      object-fit: cover;
+    }
+
+    .control-panel {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      max-width: 640px;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    select, input, button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+
+    button {
+      background: linear-gradient(45deg, #4e54c8, #8f94fb);
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.3s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    #about {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      #canvas-wrapper {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4/3;
+      }
+
+      #header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      #nav {
+        margin-top: 15px;
+      }
+      
+      body {
+        background-attachment: scroll;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Consistent Header with Navigation -->
+  <div id="header">
+    <div class="logo-container">
+      <img src="sun.jpg" alt="GLASSIFY Logo" class="logo">
+      <h1>GLASSIFY</h1>
+    </div>
+    <div id="nav">
+      <a href="index.html">Home</a>
+      <a href="try.html">Try-On</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <!-- Main Try-On Interface -->
+  <div class="control-panel">
+    <label for="input-mode">Input Mode:</label>
+    <select id="input-mode">
+      <option value="webcam">Webcam</option>
+      <option value="upload">Upload Image</option>
+    </select>
+
+    <div id="upload-section" style="display: none;">
+      <label for="upload-btn">Upload Face Image:</label>
+      <input type="file" id="upload-btn" accept="image/*">
+    </div>
+
+    <label for="upload-glasses-btn">Glasses Image:</label>
+    <input type="file" id="upload-glasses-btn" accept="image/*">
+
+    <div class="glasses-controls">
+      <label for="frame-width">Frame Width (mm):</label>
+      <input type="number" id="frame-width" placeholder="Auto">
+      <label for="frame-height">Frame Height (mm):</label>
+      <input type="number" id="frame-height" placeholder="Auto">
+    </div>
+  </div>
+
+  <!-- Canvas Container -->
+  <div id="canvas-wrapper">
+    <video id="video" width="640" height="480" autoplay muted></video>
+    <img id="uploaded-image" width="640" height="480">
+    <canvas id="face-overlay" width="640" height="480"></canvas>
+    <canvas id="glasses-overlay" width="640" height="480"></canvas>
+  </div>
+
+  <!-- About Section -->
+  <section id="about">
+    <h2>How It Works</h2>
+    <p>GLASSIFY uses advanced face detection to overlay glasses on your face in real-time. Adjust the frame dimensions for a perfect fit!</p>
+    <a href="about.html" style="color: #8f94fb; text-decoration: none;">Learn more →</a>
+  </section>
+
+  <!-- Scripts -->
+  <script src="models/face-api.min.js"></script>
+  <script>
+    // Navigation smooth scrolling
+    document.querySelectorAll('#nav a').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        if (this.getAttribute('href').startsWith('#')) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href').substring(1);
+          document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Input mode toggle (existing functionality)
+    document.getElementById("input-mode").addEventListener("change", function() {
+      const mode = this.value;
+      const video = document.getElementById("video");
+      const uploadSection = document.getElementById("upload-section");
+      const uploadedImage = document.getElementById("uploaded-image");
+
+      if (mode === "webcam") {
+        video.style.display = "block";
+        uploadSection.style.display = "none";
+        uploadedImage.style.display = "none";
+        startWebcam();
+      } else {
+        video.style.display = "none";
+        uploadSection.style.display = "block";
+        uploadedImage.style.display = "block";
+        stopWebcam();
+      }
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

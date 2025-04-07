@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About GLASSIFY</title>
+  <link rel="icon" type="image/png" href="sun.jpg">
+  <style>
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(45deg, #0f0c29, #302b63, #4e54c8, #8f94fb);
+      background-size: 300% 300%;
+      animation: gradientAnimation 6s infinite alternate, fadeIn 0.5s ease-out;
+      color: white;
+      min-height: 100vh;
+    }
+
+    #header {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px;
+    }
+
+    #nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 8px 15px;
+      border-radius: 20px;
+      transition: background 0.3s;
+    }
+
+    #nav a:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .about-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeIn 1s ease-out;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .feature {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 10px;
+      width: 200px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #4e54c8;
+      color: white;
+      border-radius: 30px;
+      text-decoration: none;
+      margin-top: 2rem;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: #8f94fb;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      #header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      #nav {
+        margin-top: 15px;
+      }
+
+      .features {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .feature {
+        width: 100%;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="header">
+    <div class="logo-container">
+      <img src="sun.jpg" alt="GLASSIFY Logo" style="width: 50px; height: 50px; border-radius: 50%;">
+      <h1>GLASSIFY</h1>
+    </div>
+    <div id="nav">
+      <a href="index.html">Home</a>
+      <a href="#about">About</a>
+    </div>
+  </div>
+
+  <div class="about-container">
+    <h2>About GLASSIFY</h2>
+    <p>Welcome to GLASSIFY, where we revolutionize eyewear shopping with cutting-edge virtual try-on technology. Our platform combines advanced face detection with augmented reality to create a seamless virtual fitting experience.</p>
+    <p>Whether you're looking for prescription glasses, sunglasses, or just want to experiment with new looks, GLASSIFY helps you find the perfect fit without leaving home.</p>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">👓</div>
+        <h3>Virtual Try-On</h3>
+        <p>See glasses on your face in real-time</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📷</div>
+        <h3>Multiple Options</h3>
+        <p>Works with webcam or uploaded photos</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✨</div>
+        <h3>Accurate Preview</h3>
+        <p>Precise positioning and sizing</p>
+      </div>
+    </div>
+
+    <a href="try.html" class="btn">Try It Now</a>
+  </div>
+
+  <!-- Optional: Load face-api.js if you plan to add interactive elements later -->
+  <script src="models/face-api.min.js"></script>
+</body>
+</html>
