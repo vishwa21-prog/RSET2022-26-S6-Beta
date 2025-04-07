@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Onboarding</title>
+    <link rel="stylesheet" href="student-onboarding.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Student Signup</h2>
+        <form id="studentForm">
+            <!-- Username Field -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="first-name">First Name</label>
+                <input type="text" id="first-name" placeholder="Enter your first name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" id="last-name" placeholder="Enter your last name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contact">Contact Number</label>
+                <div class="contact-input">
+                    <select id="countryCode" required>
+                        <option value="PIN" disabled selected>PIN </option>
+                        <option value="+1">+1 (USA)</option>
+                        <option value="+44">+44 (UK)</option>
+                        <option value="+91">+91 (India)</option>
+                        <option value="+61">+61 (Australia)</option>
+                    </select>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Your Contact Number" required pattern="\d{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="institutionName">Institution Name</label>
+                <input type="text" id="institutionName" name="institutionName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="educationLevel">Education Level</label>
+                <select id="educationLevel" name="educationLevel" required>
+                    <option value="" disabled selected>Select your level</option>
+                    <option value="Bachelor's">Bachelor's</option>
+                    <option value="Master's">Master's</option>
+                    <option value="PhD">PhD</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="GPA">GPA/CGPA</label>
+                <input type="number" id="GPA" name="GPA" step="0.01" placeholder="Enter your GPA/CGPA" required min="0" max="10" >
+            </div>
+
+            <div class="form-group">
+                <label for="year">Year of Study</label>
+                <select id="year" name="year" required>
+                    <option value="" disabled selected>Select your year</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="linkedin">LinkedIn URL (Optional)</label>
+                <input type="url" id="linkedin" name="linkedin" placeholder="https://www.linkedin.com/in/your-profile">
+            </div>
+
+            <div class="form-group">
+                <label for="github">GitHub URL (Optional)</label>
+                <input type="url" id="github" name="github" placeholder="https://github.com/your-username">
+            </div>
+
+            <button type="submit" class="submit-btn">Sign Up</button>
+        </form>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const supabaseUrl = 'https://bawhzyetjzkeypszpeqr.supabase.co'; 
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg'; // Replace with your actual Supabase key
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey); 
+
+        document.getElementById('studentForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            // Get form values
+            const username = document.getElementById('username').value;
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const dob = document.getElementById('dob').value;
+            const countryCode = document.getElementById('countryCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const contactNumber = `${countryCode}${phoneNumber}`;
+            const gender = document.getElementById('gender').value;
+            const institutionName = document.getElementById('institutionName').value;
+            const educationLevel = document.getElementById('educationLevel').value;
+            const gpa = parseFloat(document.getElementById('GPA').value);
+            const yearOfStudy = document.getElementById('year').value;
+            const linkedinUrl = document.getElementById('linkedin').value || null;
+            const githubUrl = document.getElementById('github').value || null;
+
+            // Check if the username exists in the 'users' table
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('username', username)
+                .single();
+
+            if (userError || !userData) {
+                alert('Username does not exist. Please enter a valid username.');
+                return;
+            }
+
+            const userId = userData.id;
+
+            // Insert into student_profiles
+            const { error: insertError } = await supabase.from('student_profiles').insert([
+                {
+                    user_id: userId,
+                    first_name: firstName,
+                    last_name: lastName,
+                    dob: dob,
+                    contact_number: contactNumber,
+                    gender: gender,
+                    institution_name: institutionName,
+                    education_level: educationLevel,
+                    gpa: gpa,
+                    year_of_study: yearOfStudy,
+                    linkedin_url: linkedinUrl,
+                    github_url: githubUrl,
+                }
+            ]);
+
+            if (insertError) {
+                alert('Error while submitting the form: ' + insertError.message);
+            } else {
+                alert('Student onboarded successfully!');
+                window.location.href = "jobsstudentview.html";
+            }
+        });
+
+        function validateInput(input) {
+        let value = input.value;
+
+        // Remove any characters that are not numbers or decimal points
+        value = value.replace(/[^0-9.]/g, '');
+
+        // Ensure only one decimal point is allowed
+        const decimalIndex = value.indexOf('.');
+        if (decimalIndex !== -1) {
+            value = value.slice(0, decimalIndex + 3);  // Limit to two decimals
+        }
+
+        // Update the input with the formatted value
+        input.value = value;
+    }
+    </script>
+</body>
+
+</html>

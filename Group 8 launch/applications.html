@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>launch | Applications</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --black: #000000;
+            --dark-gray: #111111;
+            --medium-gray: #222222;
+            --light-gray: #333333;
+            --white: #FFFFFF;
+            --yellow: #FFD700;
+            --light-yellow: #FFEEAA;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            background-color: var(--dark-gray);
+            color: var(--white);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--black);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid var(--light-gray);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-container {
+            padding: 0 2rem 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .logo {
+            height: 36px;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding: 0 1.5rem;
+        }
+        
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--light-gray);
+            color: var(--yellow);
+        }
+        
+        .nav-link.active {
+            background-color: var(--medium-gray);
+            color: var(--yellow);
+            font-weight: 500;
+        }
+        
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            color: var(--yellow);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--yellow);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--yellow);
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+        
+        /* Job Cards */
+        .job-card {
+            background-color: var(--medium-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--yellow);
+        }
+        
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .job-title {
+            font-size: 1.5rem;
+            color: var(--yellow);
+        }
+        
+        .company-name {
+            color: var(--white);
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+        
+        .applications-list {
+            margin-top: 1.5rem;
+        }
+        
+        .application-item {
+            background-color: var(--light-gray);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .student-name {
+            font-weight: 500;
+            color: var(--white);
+            min-width: 200px;
+        }
+        
+        .resume-link {
+            color: var(--yellow);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .resume-link:hover {
+            text-decoration: underline;
+        }
+        
+        .status-select {
+            padding: 0.5rem;
+            border-radius: 4px;
+            background-color: var(--dark-gray);
+            color: var(--white);
+            border: 1px solid var(--light-gray);
+            margin-left: auto;
+        }
+        
+        .status-select:focus {
+            outline: none;
+            border-color: var(--yellow);
+        }
+        
+        .no-applications {
+            color: var(--white);
+            opacity: 0.6;
+            font-style: italic;
+            padding: 1rem 0;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-applied {
+            background-color: #4a6fa5;
+            color: white;
+        }
+        
+        .status-accepted {
+            background-color: #2e7d32;
+            color: white;
+        }
+        
+        .status-rejected {
+            background-color: #c62828;
+            color: white;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: var(--yellow);
+            color: var(--black);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification i {
+            margin-right: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="logo1.png" alt="CareerConnect Logo" class="logo">
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="pc-dashboard.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="jobs.html" class="nav-link">
+                    <i class="fas fa-plus-circle"></i>
+                    Post Job
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="applications.html" class="nav-link active">
+                    <i class="fas fa-file-alt"></i>
+                    Review Applications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="quiz.html" class="nav-link">
+                    <i class="fas fa-question-circle"></i>
+                    Quizzes
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: auto;">
+                <a href="login_page.html" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">Job Applications</h1>
+            <div class="user-profile">
+                <div class="user-avatar">PC</div>
+            </div>
+        </div>
+        
+        <div id="jobs-container"></div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-message"></span>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = "https://bawhzyetjzkeypszpeqr.supabase.co";
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg";
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    
+        // Show notification
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            const icon = notification.querySelector('i');
+            const messageEl = document.getElementById('notification-message');
+            
+            messageEl.textContent = message;
+            
+            if (isSuccess) {
+                notification.style.backgroundColor = 'var(--yellow)';
+                notification.style.color = 'var(--black)';
+                icon.className = 'fas fa-check-circle';
+            } else {
+                notification.style.backgroundColor = '#ff4444';
+                notification.style.color = 'var(--white)';
+                icon.className = 'fas fa-exclamation-circle';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    
+        async function fetchJobsAndApplications() {
+            const { data: { user }, error: sessionError } = await supabase.auth.getUser();
+            if (sessionError || !user) {
+                console.error("Error fetching user session", sessionError);
+                showNotification("Please login to continue", false);
+                setTimeout(() => window.location.href = "mainpage.html", 1500);
+                return;
+            }
+    
+            // Fetch coordinator profile with name data
+            const { data: coordinatorData, error: coordinatorError } = await supabase
+                .from("placement_coordinators")
+                .select("id, first_name, last_name")
+                .eq("user_id", user.id)
+                .single();
+    
+            if (coordinatorError || !coordinatorData) {
+                console.error("Error fetching coordinator profile", coordinatorError);
+                showNotification("Error loading coordinator data", false);
+                return;
+            }
+    
+            // Set user avatar initials from coordinator profile
+            const userAvatar = document.querySelector('.user-avatar');
+            if (coordinatorData.first_name || coordinatorData.last_name) {
+                const firstNameInitial = coordinatorData.first_name ? 
+                    coordinatorData.first_name.charAt(0).toUpperCase() : '';
+                const lastNameInitial = coordinatorData.last_name ? 
+                    coordinatorData.last_name.charAt(0).toUpperCase() : '';
+                userAvatar.textContent = firstNameInitial + lastNameInitial;
+            } else {
+                // Fallback to email initials if no name data
+                userAvatar.textContent = user.email ? 
+                    user.email.charAt(0).toUpperCase() + user.email.charAt(1).toUpperCase() : 'PC';
+            }
+    
+            const coordinatorId = coordinatorData.id;
+    
+            // Fetch jobs with applications
+            const { data: jobs, error: jobError } = await supabase
+                .from("jobs")
+                .select(`
+                    id, 
+                    title, 
+                    company_name,
+                    applications(
+                        id, 
+                        student_profile_id, 
+                        status,
+                        student_profiles(
+                            first_name,
+                            last_name, 
+                            resume
+                        )
+                    )
+                `)
+                .eq("placement_coordinator_id", coordinatorId)
+                .order("created_at", { ascending: false });
+    
+            if (jobError) {
+                console.error("Error fetching jobs", jobError);
+                showNotification("Error loading jobs", false);
+                return;
+            }
+    
+            const container = document.getElementById("jobs-container");
+            container.innerHTML = "";
+            
+            if (jobs.length === 0) {
+                container.innerHTML = `
+                    <div class="job-card">
+                        <h2 class="job-title">No Jobs Posted Yet</h2>
+                        <p>Post your first job to start receiving applications</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            jobs.forEach(job => {
+                const jobDiv = document.createElement("div");
+                jobDiv.className = "job-card";
+                
+                jobDiv.innerHTML = `
+                    <div class="job-header">
+                        <div>
+                            <h2 class="job-title">${job.title}</h2>
+                            <p class="company-name">${job.company_name}</p>
+                        </div>
+                    </div>
+                `;
+                
+                const appList = document.createElement("div");
+                appList.className = "applications-list";
+                
+                if (job.applications.length > 0) {
+                    job.applications.forEach(app => {
+                        const appItem = document.createElement("div");
+                        appItem.className = "application-item";
+                        
+                        const statusClass = `status-${app.status}`;
+                        
+                        appItem.innerHTML = `
+                            <div class="student-name">
+                                ${app.student_profiles.first_name} ${app.student_profiles.last_name}
+                            </div>
+                            
+                            <a href="${app.student_profiles.resume}" class="resume-link" target="_blank">
+                                <i class="fas fa-file-download"></i>
+                                Download Resume
+                            </a>
+                            
+                            <div class="status-badge ${statusClass}">
+                                ${app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                            </div>
+                            
+                            <select class="status-select" data-app-id="${app.id}">
+                                <option value="applied" ${app.status === "applied" ? "selected" : ""}>Applied</option>
+                                <option value="accepted" ${app.status === "accepted" ? "selected" : ""}>Accepted</option>
+                                <option value="rejected" ${app.status === "rejected" ? "selected" : ""}>Rejected</option>
+                            </select>
+                        `;
+                        
+                        appList.appendChild(appItem);
+                    });
+                } else {
+                    appList.innerHTML = `<p class="no-applications">No applications received yet</p>`;
+                }
+                
+                jobDiv.appendChild(appList);
+                container.appendChild(jobDiv);
+            });
+        }
+    
+        async function updateApplicationStatus(event) {
+            if (event.target.classList.contains("status-select")) {
+                const appId = event.target.dataset.appId;
+                const newStatus = event.target.value;
+                
+                const { error } = await supabase
+                    .from("applications")
+                    .update({ status: newStatus })
+                    .eq("id", appId);
+                
+                if (error) {
+                    console.error("Error updating status", error);
+                    showNotification("Failed to update status", false);
+                    // Revert the select to previous value
+                    event.target.value = event.target.dataset.previousValue;
+                } else {
+                    showNotification("Application status updated");
+                    // Update the status badge
+                    const badge = event.target.closest(".application-item").querySelector(".status-badge");
+                    badge.className = `status-badge status-${newStatus}`;
+                    badge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                }
+            }
+        }
+    
+        // Store previous value when select is focused
+        document.addEventListener("focus", (event) => {
+            if (event.target.classList.contains("status-select")) {
+                event.target.dataset.previousValue = event.target.value;
+            }
+        }, true);
+    
+        document.addEventListener("DOMContentLoaded", fetchJobsAndApplications);
+        document.addEventListener("change", updateApplicationStatus);
+    </script>
+</body>
+</html>

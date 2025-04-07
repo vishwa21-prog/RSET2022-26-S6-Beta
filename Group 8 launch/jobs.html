@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>launch | Post Job</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --black: #000000;
+            --dark-gray: #111111;
+            --medium-gray: #222222;
+            --light-gray: #333333;
+            --white: #FFFFFF;
+            --yellow: #FFD700;
+            --light-yellow: #FFEEAA;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            background-color: var(--dark-gray);
+            color: var(--white);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--black);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid var(--light-gray);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-container {
+            padding: 0 2rem 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .logo {
+            height: 36px;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding: 0 1.5rem;
+        }
+        
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--light-gray);
+            color: var(--yellow);
+        }
+        
+        .nav-link.active {
+            background-color: var(--medium-gray);
+            color: var(--yellow);
+            font-weight: 500;
+        }
+        
+        .nav-link i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            color: var(--yellow);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem;
+            position: relative;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--yellow);
+        }
+        
+        .user-profile-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--yellow);
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Job Form */
+        .job-form {
+            background-color: var(--medium-gray);
+            border-radius: 8px;
+            padding: 2rem;
+            border: 1px solid var(--light-gray);
+            max-width: 800px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--white);
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: var(--dark-gray);
+            border: 1px solid var(--light-gray);
+            border-radius: 6px;
+            color: var(--white);
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--yellow);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background-color: var(--yellow);
+            color: var(--black);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--light-yellow);
+            transform: translateY(-2px);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: var(--yellow);
+            color: var(--black);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification i {
+            margin-right: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 2rem;
+            }
+            .user-profile-container {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="logo1.png" alt="CareerConnect Logo" class="logo">
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="pc-dashboard.html" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="pc-dashboard.html" class="nav-link active">
+                    <i class="fas fa-plus-circle"></i>
+                    Post Job
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="applications.html" class="nav-link">
+                    <i class="fas fa-file-alt"></i>
+                    Review Applications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="quiz.html" class="nav-link">
+                    <i class="fas fa-question-circle"></i>
+                    Quizzes
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: auto;">
+                <a href="login_page.html" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- User Avatar Container - Fixed Position -->
+        <div class="user-profile-container">
+            <div class="user-avatar" id="userAvatar">PC</div>
+        </div>
+        
+        <div class="header">
+            <h1 class="page-title">Post New Job</h1>
+        </div>
+        
+        <form id="jobForm" class="job-form">
+            <div class="form-group">
+                <label for="title">Job Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Job Description</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="company">Company Name</label>
+                <input type="text" id="company" name="company" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="cgpa">Minimum CGPA Required</label>
+                <input type="number" id="cgpa" name="cgpa" step="0.01" min="0" max="10" required>
+            </div>
+            
+            <!-- <div class="form-group">
+                <label for="skills">Required Skills (comma separated)</label>
+                <input type="text" id="skills" name="skills" required>
+            </div> -->
+            
+            <input type="hidden" id="coordinator" name="coordinator">
+            
+            <button type="submit" class="submit-btn">Post Job</button>
+        </form>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-message"></span>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = "https://bawhzyetjzkeypszpeqr.supabase.co";
+        const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhd2h6eWV0anprZXlwc3pwZXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE1OTI4MzgsImV4cCI6MjA0NzE2ODgzOH0.KAzCjKkqixRLz522RA7_SNvWMQ9sJdga2BoQJPPw2Hg";
+        window.supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    
+        // Show notification
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            const icon = notification.querySelector('i');
+            const messageEl = document.getElementById('notification-message');
+            
+            messageEl.textContent = message;
+            
+            if (isSuccess) {
+                notification.style.backgroundColor = 'var(--yellow)';
+                notification.style.color = 'var(--black)';
+                icon.className = 'fas fa-check-circle';
+            } else {
+                notification.style.backgroundColor = '#ff4444';
+                notification.style.color = 'var(--white)';
+                icon.className = 'fas fa-exclamation-circle';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    
+        // Fetch user session and coordinator ID
+        async function getSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const userId = session.user.id;
+                
+                // Query placement_coordinators table
+                const { data: coordinatorData, error: coordinatorError } = await supabase
+                    .from('placement_coordinators')
+                    .select('id, first_name, last_name')
+                    .eq('user_id', userId)
+                    .single();
+    
+                if (coordinatorError) {
+                    console.error("Error fetching coordinator ID:", coordinatorError);
+                    showNotification("Error loading coordinator data", false);
+                } else {
+                    document.getElementById("coordinator").value = coordinatorData.id;
+                    
+                    // Set user avatar initials and name
+                    const userAvatar = document.getElementById('userAvatar');
+                    const welcomeMessage = document.getElementById('welcomeMessage');
+                    
+                    // Get initials from first_name and last_name
+                    const firstNameInitial = coordinatorData.first_name ? 
+                        coordinatorData.first_name.charAt(0).toUpperCase() : '';
+                    const lastNameInitial = coordinatorData.last_name ? 
+                        coordinatorData.last_name.charAt(0).toUpperCase() : '';
+                    
+                    // Set avatar initials
+                    userAvatar.textContent = (firstNameInitial || lastNameInitial) ? 
+                        firstNameInitial + lastNameInitial : "PC";
+                    
+                    // Set welcome message if element exists
+                    if (welcomeMessage && coordinatorData.first_name) {
+                        welcomeMessage.textContent = `Welcome, ${coordinatorData.first_name}`;
+                    }
+                }
+            } else {
+                showNotification("Please login to continue", false);
+                setTimeout(() => {
+                    window.location.href = "login_page.html";
+                }, 1500);
+            }
+        }
+    
+        // Handle form submission
+        document.getElementById("jobForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+    
+            const jobData = {
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                company_name: document.getElementById("company").value,
+                //skills: document.getElementById("skills").value.split(',').map(skill => skill.trim()),
+                placement_coordinator_id: document.getElementById("coordinator").value,
+                min_cgpa: parseFloat(document.getElementById("cgpa").value)
+            };
+    
+            // Insert the job into Supabase
+            const { error } = await supabase
+                .from('jobs')
+                .insert([jobData]);
+    
+            if (error) {
+                console.error("Error adding job:", error);
+                showNotification("Failed to add job", false);
+            } else {
+                showNotification("Job posted successfully!");
+                // Reset form
+                document.getElementById("jobForm").reset();
+            }
+        });
+    
+        // Initialize
+        document.addEventListener("DOMContentLoaded", async () => {
+            await getSession();
+        });
+    </script>
+</body>
+</html>
