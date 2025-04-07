@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to GLASSIFY</title>
+  <link rel="icon" type="image/png" href="sun.jpg">
+  <style>
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(78, 84, 200, 0.6); }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(78, 84, 200, 0.9); }
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* Base Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Starry Background */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 2s infinite ease-in-out;
+    }
+
+    /* Content Container */
+    .welcome-container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* Logo */
+    .logo {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 1.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #4e54c8;
+      animation: pulse 4s infinite;
+    }
+
+    /* Typography */
+    h1 {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      margin: 0;
+      background: linear-gradient(to right, #8f94fb, #4e54c8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .tagline {
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      margin: 1rem 0 2.5rem;
+      opacity: 0.9;
+      max-width: 600px;
+    }
+
+    /* Buttons */
+    .btn-container {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .action-btn {
+      background: linear-gradient(45deg, #4e54c8, #8f94fb);
+      color: white;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 10px 30px rgba(78, 84, 200, 0.5);
+      transition: all 0.3s ease;
+      animation: float 3s infinite;
+    }
+    .action-btn:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(78, 84, 200, 0.7);
+    }
+
+    /* Features Grid */
+    .features {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .feature {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 1.5rem;
+      border-radius: 15px;
+      width: 160px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    .feature:hover {
+      transform: translateY(-8px);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.8rem;
+      color: #8f94fb;
+    }
+
+    /* Mobile Optimization */
+    @media (max-width: 600px) {
+      .welcome-container {
+        padding: 1.5rem;
+      }
+      .features {
+        flex-direction: column;
+        align-items: center;
+      }
+      .feature {
+        width: 100%;
+        max-width: 250px;
+      }
+      .action-btn {
+        width: 100%;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Dynamic Star Background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Main Content -->
+  <div class="welcome-container">
+    <img src="sun.jpg" alt="GLASSIFY Logo" class="logo">
+    <h1>GLASSIFY</h1>
+    <p class="tagline">Experience the future of eyewear with our virtual try-on technology</p>
+    
+    <div class="btn-container">
+      <a href="try.html" class="action-btn">START TRY-ON</a>
+      <a href="about.html" class="action-btn" style="background: rgba(255,255,255,0.1);">LEARN MORE</a>
+    </div>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">👓</div>
+        <div>Virtual Try-On</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📷</div>
+        <div>Webcam or Photo</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✨</div>
+        <div>Real-Time Preview</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate twinkling stars
+    document.addEventListener('DOMContentLoaded', () => {
+      const starsContainer = document.getElementById('stars');
+      const fragment = document.createDocumentFragment();
+      
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // Randomize star properties
+        const size = Math.random() * 2 + 0.5;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}vw`;
+        star.style.top = `${Math.random() * 100}vh`;
+        star.style.animationDelay = `${Math.random() * 2}s`;
+        star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+        
+        fragment.appendChild(star);
+      }
+      
+      starsContainer.appendChild(fragment);
+    });
+  </script>
+</body>
+</html>
