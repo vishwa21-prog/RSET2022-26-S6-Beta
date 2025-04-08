@@ -1,0 +1,115 @@
+/* Login.css - Dark Neon Theme */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000; /* Dark background */
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+/* ✅ Centering the Login Box Perfectly */
+.form-wrapper {
+  background: #121212;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0px 0px 20px rgba(138, 43, 226, 0.8); /* Neon Glow */
+  width: 350px;
+  max-width: 90%;
+  text-align: center;
+  
+  /* ✅ Ensures Centering */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  /* ✅ Centered using Margin */
+  margin: auto;
+}
+
+/* ✅ Title with Gradient */
+h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(to right, #ff00ff, #00ffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 15px;
+}
+
+/* ✅ Styled Inputs */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 2px solid transparent;
+  outline: none;
+  border-radius: 5px;
+  background: #222;
+  color: white;
+  transition: 0.3s;
+}
+
+/* ✅ Glowing Effect on Focus */
+input:focus {
+  border: 2px solid #d85fff;
+  box-shadow: 0px 0px 10px rgba(214, 104, 255, 0.8);
+}
+
+/* ✅ Stylish Button */
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  margin-top: 10px;
+  background: linear-gradient(to right, #0084ff, #ff00ff);
+}
+
+/* ✅ Hover Effect */
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 0px 15px rgba(255, 0, 255, 0.8);
+}
+
+/* ✅ Reset Password Button */
+.reset-btn {
+  background: transparent;
+  color: #d85fff;
+  text-decoration: underline;
+  cursor: pointer;
+  border: none;
+  padding: 5px;
+  margin-top: 10px;
+}
+
+/* ✅ Message Styling */
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* ✅ Responsive Adjustments */
+@media (max-width: 400px) {
+  .form-wrapper {
+    width: 90%;
+    padding: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.7rem;
+  }
+}
+body.login-page .dashboard {
+  display: none;
+}
