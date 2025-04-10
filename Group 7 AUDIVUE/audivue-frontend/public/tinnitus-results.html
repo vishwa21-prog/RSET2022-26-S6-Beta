@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Firebase SDKs for authentication and Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script> <!-- Firebase app SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script> <!-- Firebase Authentication SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> <!-- Firebase Firestore SDK -->
+
+    <script>
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+        authDomain: "audivue-c9f43.firebaseapp.com",
+        databaseURL: "https://audivue-c9f43-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "audivue-c9f43",
+        storageBucket: "audivue-c9f43.firebasestorage.app",
+        messagingSenderId: "342383567867",
+        appId: "1:342383567867:web:76e03a34c737b140e3615e"
+      };
+
+      // Initialize Firebase app, auth, and firestore services
+      const app = firebase.initializeApp(firebaseConfig); 
+      const auth = firebase.auth();
+      const firestore = firebase.firestore();
+    </script>
+
+    <!-- Meta information for the page -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinnitus Test Results</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+        .test-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%);
+        }
+
+        .test-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            transition: 0.5s;
+        }
+        .test-container:hover{
+    transform:scale(1.05) ;
+    box-shadow: 0 0 5px #008cff, 0 0 20px #008cff, 0 0 50px #008cff,
+      0 0 100px #008cff;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        #results {
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        #results p {
+            margin-bottom: 0.5rem;
+        }
+
+        #advice {
+            list-style-type: none;
+            padding: 0;
+            margin: 2rem 0;
+        }
+
+        #advice li {
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            background: #f8f8f8;
+            border-radius: 4px;
+            text-align: left;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-page">
+        <div class="test-container">
+            <h1>Your Tinnitus Test Results</h1>
+            <div id="results"></div>
+            <ul id="advice"></ul>
+
+            <button onclick="window.location.href='tinnitus.html'">Retake Test</button>
+            <button onclick="window.location.href='index.html'">Back to Tests</button>
+            <button onclick="printResults()" class="print-button">Print Results</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const resultsContainer = document.getElementById("results");
+            const adviceContainer = document.getElementById("advice");
+
+            // Get the results data from the query parameter
+            let tinnitusData = JSON.parse(decodeURIComponent(urlParams.get("data")));
+            let frequency = parseInt(tinnitusData.frequency);
+            let volume = parseInt(tinnitusData.volume);
+
+            // Display results
+            resultsContainer.innerHTML = `
+                <p>Matched Frequency: <strong>${frequency} Hz</strong></p>
+                <p>Matched Volume: <strong>${volume} dB</strong></p>
+            `;
+
+            let adviceList = [];
+
+            // Frequency-based advice
+            if (frequency >= 5000 && frequency < 6000) {
+                adviceList.push("Your tinnitus frequency is in the 5-6 kHz range.");
+                adviceList.push("Mild tinnitus, often linked to aging or minor hearing damage.");
+                adviceList.push("Avoid loud environments to prevent worsening.");
+            } else if (frequency >= 6000 && frequency < 7000) {
+                adviceList.push("Your tinnitus frequency is in the 6-7 kHz range.");
+                adviceList.push("Can be caused by stress or prolonged noise exposure.");
+                adviceList.push("Use relaxation techniques and white noise to manage symptoms.");
+            } else if (frequency >= 7000 && frequency <= 8000) {
+                adviceList.push("Your tinnitus frequency is in the 7-8 kHz range.");
+                adviceList.push("Often linked to long-term noise exposure or ear damage.");
+                adviceList.push("Consult an audiologist if symptoms persist.");
+            }
+
+            // Volume-based advice
+            if (volume >= 0 && volume <= 5) {
+                adviceList.push("Tinnitus is at a low volume (0-5 dB).");
+                adviceList.push("Usually mild and not disruptive.");
+                adviceList.push("Avoid complete silence; use background noise if needed.");
+            } else if (volume > 5 && volume <= 10) {
+                adviceList.push("Tinnitus is at a moderate volume (6-10 dB).");
+                adviceList.push("Can be distracting but manageable.");
+                adviceList.push("Try white noise machines or meditation.");
+            } else if (volume > 10 && volume <= 15) {
+                adviceList.push("Tinnitus is at a high volume (11-15 dB).");
+                adviceList.push("May affect daily life and concentration.");
+                adviceList.push("Seek professional consultation for treatment options.");
+            }
+
+            // Display advice in the list
+            adviceList.forEach(advice => {
+                let li = document.createElement("li");
+                li.textContent = advice;
+                adviceContainer.appendChild(li);
+            });
+
+            // Now store the result in Firestore under the 'Users' collection
+            const userEmail = localStorage.getItem('userEmail'); // Get user email from localStorage
+            if (userEmail) {
+                // Use Firestore to store the data
+                const userRef = firestore.collection('Users').doc(userEmail.replace('.', ',')).collection('Tinnitus Test');
+                const testData = {
+                    frequency: frequency,
+                    volume: volume,
+                    timestamp: new Date().toISOString(),
+                };
+
+                userRef.add(testData)
+                    .then(() => {
+                        console.log("Test result saved to Firestore successfully.");
+                    })
+                    .catch(error => {
+                        console.error("Error saving test result: ", error);
+                    });
+            } else {
+                console.log("No user email found in localStorage.");
+            }
+        });
+    </script>
+
+    <script>
+        // Function to print the current page
+        function printResults() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

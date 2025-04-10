@@ -1,0 +1,102 @@
+<!DOCTYPE html> <!-- Declares the document as an HTML5 file -->
+<html lang="en"> <!-- Sets the document language to English -->
+<head>
+    <!-- Firebase SDKs for app functionality -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration details
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+            authDomain: "audivue-c9f43.firebaseapp.com",
+            projectId: "audivue-c9f43",
+            storageBucket: "audivue-c9f43.firebasestorage.app",
+            messagingSenderId: "342383567867",
+            appId: "1:342383567867:web:76e03a34c737b140e3615e"
+        };
+
+        // Initialize Firebase services
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+    </script>
+
+    <meta charset="UTF-8"> <!-- Sets character encoding -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures mobile responsiveness -->
+    <title>Amsler Grid Test Results</title> <!-- Sets the title of the webpage -->
+    <link rel="stylesheet" href="css/style.css"> <!-- Links an external CSS file for styling -->
+</head>
+<body>
+    <div class="test-page"> <!-- Main wrapper div for the test page -->
+        <div class="test-container"> <!-- Container for test results -->
+            <h1>Amsler Grid Test Results</h1> <!-- Main heading of the page -->
+            
+            <div id="testResults"></div> <!-- Div to display test results -->
+            
+            <h2>Assessment</h2> <!-- Subheading for assessment -->
+            <p id="assessment"></p> <!-- Paragraph to display assessment text -->
+            
+            <ul id="recommendations"></ul> <!-- Unordered list to display recommendations -->
+            
+            <a href="index.html" class="back-button">Return to Main Menu</a> <!-- Link to return to main menu -->
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Retrieve the test results from the URL
+            const results = JSON.parse(decodeURIComponent(window.location.search.substring(1).split('data=')[1]));
+            
+            // Display the results in the "testResults" div
+            const testResultsDiv = document.getElementById('testResults');
+            testResultsDiv.innerHTML = `
+                <h3>Your Amsler Grid Results</h3>
+                <p>You reported: ${results.response}</p>
+            `;
+            
+            // Display the assessment text
+            document.getElementById('assessment').textContent = results.assessment;
+            
+            // Display the recommendations
+            document.getElementById('recommendations').innerHTML = results.recommendations.map(rec => 
+                `<li>${rec}</li>`).join('');
+            
+            // Store test results in Firestore
+            storeTestResults(results);
+        });
+
+        // Function to store test results in Firestore
+        function storeTestResults(results) {
+            const userEmail = localStorage.getItem('userEmail'); // Retrieve user email from localStorage
+
+            if (userEmail) {
+                const userRef = firestore.collection('Users').doc(userEmail);
+                const testRef = userRef.collection('Amsler Grid Test').doc(); // Create a document reference
+
+                const testData = {
+                    response: results.response,
+                    assessment: results.assessment,
+                    recommendations: results.recommendations,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                testRef.set(testData)
+                    .then(() => console.log("Test results successfully stored in Firestore."))
+                    .catch(error => console.error("Error storing test results:", error));
+            } else {
+                console.error("User email not found in localStorage.");
+            }
+        }
+    </script>
+    
+    <button onclick="printResults()" class="print-button">Print Results</button> <!-- Button to print the results -->
+    
+    <script>
+        function printResults() {
+            window.print(); // Function to print the results page
+        }
+    </script>
+</body>
+</html>

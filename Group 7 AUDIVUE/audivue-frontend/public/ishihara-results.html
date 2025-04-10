@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Firebase SDKs to enable Firebase functionality -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+      // Firebase configuration for connecting the web app to Firebase services
+      const firebaseConfig = {
+        apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+        authDomain: "audivue-c9f43.firebaseapp.com",
+        databaseURL: "https://audivue-c9f43-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "audivue-c9f43",
+        storageBucket: "audivue-c9f43.firebasestorage.app",
+        messagingSenderId: "342383567867",
+        appId: "1:342383567867:web:76e03a34c737b140e3615e"
+      };
+
+      // Initialize Firebase with the given configuration
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();  // Authentication service
+      const database = firebase.database();  // Realtime database service
+    </script>
+
+    <!-- Meta tags for proper character encoding and responsive design -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title of the page shown in the browser tab -->
+    <title>Ishihara Test Results</title>
+
+    <!-- Linking to an external CSS file for styling -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Main container for the results page -->
+    <div class="test-page">
+        <div class="test-container">
+            <!-- Heading for the results section -->
+            <h1>Ishihara Color Blindness Test Results</h1>
+            
+            <!-- Div element to display the test results -->
+            <div id="testResults"></div>
+
+            <!-- Section for the assessment of the test results -->
+            <h2>Assessment</h2>
+            <p id="assessment"></p>
+
+            <!-- List of recommendations based on the test results -->
+            <ul id="recommendations"></ul>
+
+            <!-- Link to return to the main menu -->
+            <a href="index.html" class="back-button">Return to Main Menu</a>
+        </div>
+    </div>
+
+    <!-- Script to handle the processing of results once the page loads -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Retrieve the results from the query string in the URL
+            const results = JSON.parse(decodeURIComponent(window.location.search.substring(1).split('data=')[1]));
+            
+            // Displaying the test results in the 'testResults' div
+            const testResultsDiv = document.getElementById('testResults');
+            testResultsDiv.innerHTML = `
+                <h3>Your Ishihara Test Results</h3>
+                <p>You identified the following numbers:</p>
+                <ul>${results.correctAnswers.map((answer, index) => 
+                    `<li>Plate ${index + 1}: ${answer.correct ? 'Correct' : 'Incorrect'} (You answered ${answer.userAnswer})</li>`
+                ).join('')}</ul>
+            `;
+            
+            // Displaying the overall assessment based on the results
+            const assessmentDiv = document.getElementById('assessment');
+            assessmentDiv.textContent = results.assessment;
+            
+            // Displaying the list of recommendations based on the results
+            const recommendationsList = document.getElementById('recommendations');
+            recommendationsList.innerHTML = results.recommendations.map(rec => 
+                `<li>${rec}</li>`).join('');
+        });
+    </script>
+</body>
+</html>
+

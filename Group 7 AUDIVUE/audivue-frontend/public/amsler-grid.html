@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Set character encoding and viewport settings for responsiveness -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Title of the webpage -->
+    <title>Amsler Grid Test</title>
+    
+    <!-- Link to external CSS stylesheet for styling -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="amsler-grid-background">
+    <!-- Main container for the test page -->
+    <div class="test-page">
+        <div class="test-container">
+            <!-- Heading for the Amsler Grid Test -->
+            <h1 class="heading">Amsler Grid Test</h1>
+            
+            <!-- Amsler Grid Image Display -->
+            <div class="amsler-grid-container">
+                <img id="amsler-grid" src="images/amsler-grid-black.png" alt="Amsler Grid" class="amsler-grid-image">
+            </div>
+            
+            <!-- Dropdown menu to select grid type -->
+            <label for="grid-selector">Choose Grid Type:</label>
+            <select id="grid-selector">
+                <option value="images/amsler-grid-black.png">Black Grid</option>
+                <option value="images/amsler-grid-white.png">White Grid</option>
+            </select>
+            
+            <!-- Instructions for the test -->
+            <p class="instructions">Focus on the central dot. Do you see any distortion or missing lines?</p>
+            
+            <!-- Buttons for user response -->
+            <div class="response-buttons">
+                <button id="yes-button">Yes, I see distortion</button>
+                <button id="no-button">No, I don't see distortion</button>
+            </div>
+            
+            <!-- Placeholder to display test result -->
+            <div id="result"></div>
+            
+            <!-- Link to return to the main tests page -->
+            <a href="index.html" class="back-button">Back to Tests</a>
+        </div>
+    </div>
+    
+    <script>
+        // Change the grid image when the user selects a different option
+        document.getElementById("grid-selector").addEventListener("change", function() {
+            document.getElementById("amsler-grid").src = this.value;
+        });
+
+        // Handle "Yes" button click event
+        document.getElementById("yes-button").addEventListener("click", function() {
+            const resultsData = {
+                response: "Yes, I see distortion",
+                assessment: "You reported seeing distortion or missing lines on the Amsler Grid.",
+                recommendations: [
+                    "This may indicate potential vision issues such as macular degeneration, diabetic retinopathy, or other macular disorders.",
+                    "We recommend consulting with an eye care professional for further evaluation."
+                ]
+            };
+            // Redirect to results page with encoded test data
+            const resultData = encodeURIComponent(JSON.stringify(resultsData));
+            window.location.href = `amsler-grid-results.html?data=${resultData}`;
+        });
+
+        // Handle "No" button click event
+        document.getElementById("no-button").addEventListener("click", function() {
+            const resultsData = {
+                response: "No, I don't see distortion",
+                assessment: "Your central vision appears normal based on this preliminary test.",
+                recommendations: [
+                    "This suggests your central vision appears normal based on this preliminary test.",
+                    "Remember that this is not a substitute for a comprehensive eye examination."
+                ]
+            };
+            // Redirect to results page with encoded test data
+            const resultData = encodeURIComponent(JSON.stringify(resultsData));
+            window.location.href = `amsler-grid-results.html?data=${resultData}`;
+        });
+    </script>
+</body>
+</html>

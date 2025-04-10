@@ -1,0 +1,288 @@
+body {
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Poppins', sans-serif; 
+    background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%); 
+    line-height: 1.6; 
+}
+
+a {
+    text-decoration: none; 
+    color: white; 
+    transition: color 0.3s ease; 
+}
+
+.test-page, .tests-page {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    min-height: 100vh; 
+}
+
+.container, .test-container {
+    background: white;
+    text-align: center;
+    padding: 2rem;
+    border-radius: 16px;
+    transition: 0.5s;
+    width: 1400px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.test-container {
+    width: 1000px;
+}
+.container:hover, .test-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 5px #008cff, 0 0 20px #008cff, 0 0 50px #008cff, 0 0 100px #008cff;
+}
+
+h1 {
+    margin: 0 0 1rem; 
+    color: #333; 
+}
+
+h2 {
+    margin: 0 0 1rem; 
+    color: white; 
+}
+
+.instructions {
+    font-size: 1.1rem; 
+    margin: 1rem 0; 
+    color: #555; 
+}
+
+button {
+    padding: 0.8rem 1.5rem; 
+    font-size: 1rem; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    background: #4caf50; 
+    color: #0a0a0a; 
+    transition: background 0.3s ease; 
+    margin: 0.5rem; 
+}
+
+button:hover {
+    background: #82e84b; 
+}
+
+.back-button {
+    display: inline-block; 
+    margin-top: 1.5rem; 
+    font-weight: bold; 
+    padding: 0.5rem 1rem; 
+    border-radius: 8px; 
+    background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%); 
+    color: white; 
+    transition: 0.3s ease; 
+}
+
+.back-button:hover { 
+    transform: scale(1.05);
+    text-decoration: none; 
+}
+
+.test-grid {
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 1.5rem; 
+    margin-top: 2rem; 
+    justify-content: center; 
+}
+
+.test-card {
+    flex: 1 1 300px; 
+    padding: 2rem; 
+    border-radius: 12px; 
+    background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%); 
+    box-shadow: 0 8px 20px rgba(9, 9, 9, 0.2); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+    color: white; 
+    text-decoration: none; 
+}
+
+.test-card:hover {
+    transform: translateY(-8px); 
+    box-shadow: 0 12px 30px rgba(10, 10, 10, 0.4); 
+}
+
+.test-card h2 {
+    margin-top: 0; 
+    font-size: 1.5rem; 
+}
+
+#results {
+    margin: 2rem 0; 
+}
+
+#results p {
+    font-size: 1.2rem; 
+    margin-bottom: 1rem; 
+}
+
+#advice {
+    list-style-type: none; 
+    padding: 0; 
+    margin: 2rem 0; 
+}
+
+#advice li {
+    padding: 0.8rem; 
+    margin-bottom: 0.8rem; 
+    background: #f8f8f8; 
+    border-radius: 8px; 
+    font-size: 1.1rem; 
+}
+
+.ishihara-container {
+    margin: 2rem 0; 
+}
+
+.amsler-grid-container {
+    margin: 2rem 0; 
+}
+
+.test-controls {
+    margin: 1rem 0; 
+}
+
+.sliders {
+    margin: 1.5rem 0; 
+}
+
+.eye-chart {
+    margin: 2rem 0; 
+    max-width: 100%; 
+}
+
+.eye-chart img {
+    width: 100%; 
+    height: auto; 
+}
+
+.response-box {
+    margin: 1.5rem 0; 
+    padding: 1rem; 
+    background: #f8f8f8; 
+    border-radius: 8px; 
+    text-align: left; 
+}
+
+.response-box label {
+    display: block; 
+    margin-bottom: 0.5rem; 
+    font-weight: bold; 
+}
+
+.response-box input {
+    width: 100%; 
+    padding: 0.5rem; 
+    margin-bottom: 0.5rem; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+}
+
+#submit-response {
+    background: #4caf50; 
+    color: white; 
+    border: none; 
+    padding: 0.5rem 1rem; 
+    border-radius: 4px; 
+    cursor: pointer; 
+}
+
+#submit-response:hover {
+    background: #45a049; 
+}
+
+#result {
+    margin-top: 1rem; 
+    padding: 1rem; 
+    background: #f8f8f8; 
+    border-radius: 8px; 
+}
+
+.print-button {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #4caf50;
+    color: white;
+    transition: 0.3s ease;
+    margin: 0.5rem;
+}
+
+img {
+    width: 350px;
+}
+
+.white-card {
+    background: white; 
+    border-radius: 16px; 
+    padding: 1rem; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+    max-width: 500px; 
+    margin: 1rem auto; 
+    text-align: center; 
+}
+
+.white-card h1 {
+    color: #333; 
+    margin-bottom: 1rem; 
+    font-size: 1.5rem; 
+}
+
+.white-card label {
+    display: block; 
+    margin-bottom: 0.3rem; 
+    font-weight: bold; 
+    color: #555; 
+    font-size: 0.9rem; 
+}
+
+.white-card input, .white-card select {
+    width: 100%; 
+    padding: 0.5rem; 
+    margin-bottom: 0.8rem; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    font-size: 0.9rem; 
+    box-sizing: border-box; 
+}
+
+.white-card button {
+    background: #4caf50; 
+    color: white; 
+    border: none; 
+    padding: 0.5rem 1rem; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-size: 0.9rem; 
+    transition: background 0.3s ease; 
+}
+
+.white-card button:hover {
+    background: #45a049; 
+}
+
+.white-card p {
+    color: #555; 
+    margin-top: 0.8rem; 
+    font-size: 0.9rem; 
+}
+
+.white-card a {
+    color: #4caf50; 
+    text-decoration: none; 
+    font-weight: bold; 
+    font-size: 0.9rem; 
+}
+
+.white-card a:hover {
+    text-decoration: underline; 
+}

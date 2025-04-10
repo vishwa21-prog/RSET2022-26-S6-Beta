@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Basic meta tags for character encoding and viewport settings -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Page title that appears in the browser tab -->
+    <title>Pure Tone Audiometry Test</title>
+    
+    <!-- External Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <!-- Firebase configuration and initialization -->
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+            authDomain: "audivue-c9f43.firebaseapp.com",
+            databaseURL: "https://audivue-c9f43-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "audivue-c9f43",
+            storageBucket: "audivue-c9f43.firebasestorage.app",
+            messagingSenderId: "342383567867",
+            appId: "1:342383567867:web:76e03a34c737b140e3615e"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+    </script>
+    
+    <!-- Inline CSS for styling the page -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+        .test-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%);
+        }
+        
+        .test-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            transition: 0.5s;
+        }
+        .test-container:hover{
+    transform:scale(1.05) ;
+    box-shadow: 0 0 5px #008cff, 0 0 20px #008cff, 0 0 50px #008cff,
+      0 0 100px #008cff;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        p {
+            color: #555;
+            margin-bottom: 1.5rem;
+        }
+        
+        .test-controls {
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .frequency-volume {
+            margin: 1rem 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-page">
+        <div class="test-container">
+            <h1>Pure Tone Audiometry Test</h1>
+            <p>Press "Play Tone" to hear the sound.</p>
+            
+            <div class="test-controls">
+                <button id="playTone">Play Tone</button>
+            </div>
+            
+            <div class="frequency-volume">
+                <p>Current Frequency: <span id="frequency">250</span> Hz</p>
+                <p>Current Volume: <span id="volume">20</span> dB</p>
+            </div>
+            
+            <div class="test-controls">
+                <button id="yesButton">Yes, I can hear</button>
+                <button id="noButton">No, I can't hear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inline JavaScript for handling functionality -->
+    <script>
+        // Wait until the DOM content is loaded before executing the script
+        document.addEventListener("DOMContentLoaded", function () {
+            const playButton = document.getElementById("playTone"); // Play tone button
+            const yesButton = document.getElementById("yesButton"); // "Yes, I can hear" button
+            const noButton = document.getElementById("noButton"); // "No, I can't hear" button
+            const frequencyDisplay = document.getElementById("frequency"); // Frequency display element
+            const volumeDisplay = document.getElementById("volume"); // Volume display element
+
+            // Web Audio API context for playing the tone
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let oscillator, gainNode;
+
+            // Frequency options for the test
+            let frequencies = [250, 500, 1000, 2000, 4000, 8000];
+            let currentFrequencyIndex = 0; // Index to track current frequency
+            let currentVolume = 20; // Initial volume
+            let results = []; // Store user responses
+            let isPlaying = false; // Flag to check if tone is playing
+
+            // Function to start the tone
+            function startTone(frequency, volume) {
+                stopTone(); // Stop previous tone if playing
+
+                // Create oscillator (sound source) and gain (volume control) nodes
+                oscillator = audioContext.createOscillator();
+                gainNode = audioContext.createGain();
+
+                oscillator.type = "sine"; // Set waveform type to sine
+                oscillator.frequency.value = frequency; // Set frequency of the tone
+
+                // Adjust volume using a logarithmic scale (for dB values)
+                let gainValue = Math.pow(10, (volume - 80) / 20);
+                gainNode.gain.value = gainValue;
+
+                // Connect nodes to the audio context
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Start the oscillator
+                oscillator.start();
+                isPlaying = true;
+            }
+
+            // Function to stop the tone
+            function stopTone() {
+                if (oscillator) {
+                    oscillator.stop(); // Stop the oscillator
+                    oscillator.disconnect(); // Disconnect the oscillator
+                    isPlaying = false;
+                }
+            }
+
+            // Play button click event listener
+            playButton.addEventListener("click", () => {
+                if (!isPlaying) {
+                    let frequency = frequencies[currentFrequencyIndex]; // Get current frequency
+                    startTone(frequency, currentVolume); // Start the tone with current settings
+                    frequencyDisplay.textContent = frequency; // Update frequency display
+                    volumeDisplay.textContent = currentVolume; // Update volume display
+                }
+            });
+
+            // "Yes, I can hear" button click event listener
+            yesButton.addEventListener("click", () => {
+                stopTone(); // Stop the tone after the response
+                results.push({ frequency: frequencies[currentFrequencyIndex], volume: currentVolume }); // Store result
+
+                currentFrequencyIndex++; // Move to the next frequency
+                currentVolume = 20; // Reset volume for next tone
+
+                // Update the frequency and volume for the next test
+                if (currentFrequencyIndex < frequencies.length) {
+                    frequencyDisplay.textContent = frequencies[currentFrequencyIndex];
+                    volumeDisplay.textContent = currentVolume;
+                } else {
+                    redirectToResults(); // If all frequencies have been tested, go to results page
+                }
+            });
+
+            // "No, I can't hear" button click event listener
+            noButton.addEventListener("click", () => {
+                stopTone(); // Stop the tone
+
+                // If the volume is less than 80 dB, increase it and play the tone again
+                if (currentVolume < 80) {
+                    currentVolume += 10;
+                    volumeDisplay.textContent = currentVolume;
+                    startTone(frequencies[currentFrequencyIndex], currentVolume);
+                } else {
+                    // If the volume reaches 80 dB and the tone is not heard, store the result as "Not Heard"
+                    results.push({ frequency: frequencies[currentFrequencyIndex], volume: "Not Heard" });
+                    currentFrequencyIndex++; // Move to the next frequency
+
+                    // Check if all frequencies have been tested
+                    if (currentFrequencyIndex >= frequencies.length) {
+                        redirectToResults(); // Redirect to results page
+                    } else {
+                        // Reset volume and update the display for the next frequency
+                        currentVolume = 20;
+                        frequencyDisplay.textContent = frequencies[currentFrequencyIndex];
+                        volumeDisplay.textContent = currentVolume;
+                    }
+                }
+            });
+
+            // Function to redirect to results page and save test results
+            function redirectToResults() {
+                const user = auth.currentUser; // Get the current user from Firebase Auth
+                if (!user) {
+                    alert('Please log in to save your results');
+                    return;
+                }
+
+                // Calculate the average volume (threshold) for the test
+                let avgVolume = results
+                    .filter(r => typeof r.volume === 'number') // Only consider numerical volume values
+                    .reduce((sum, r) => sum + r.volume, 0) / results.length;
+
+                // Create test data object
+                let testData = {
+                    testName: 'Pure Tone Audiometry',
+                    score: avgVolume,
+                    details: {
+                        results: results,
+                        frequencies: frequencies
+                    }
+                };
+
+                // Save the test results to Firebase
+                saveTestResults(testData);
+
+                // Redirect to the results page and pass the results as query parameters
+                let resultData = encodeURIComponent(JSON.stringify(results));
+                window.location.href = `audiometry-results.html?data=${resultData}`;
+            }
+
+            // Placeholder function to save results to Firebase (can be implemented later)
+            function saveTestResults(testData) {
+                // Example: Save to Firebase Realtime Database
+                database.ref('testResults').push(testData);
+            }
+        });
+    </script>
+</body>
+</html>

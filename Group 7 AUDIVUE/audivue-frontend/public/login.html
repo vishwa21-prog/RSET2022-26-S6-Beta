@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <!-- Link to external CSS for styling -->
+    <link rel="stylesheet" type="text/css" href="loginstyle.css" />
+</head>
+<body>
+    <div class="container">
+        <!-- Login form container -->
+        <div class="form-container sign-in-container">
+            <form id="loginForm">
+                <h2>Login</h2>
+                <input type="email" id="email" placeholder="Email" required />
+                <input type="password" id="password" placeholder="Password" required />
+                <button type="submit" class='btn'>Login</button>
+            </form>
+        </div>
+        
+        <!-- Signup prompt container -->
+        <div class="form-container sign-up-container">
+            <h2>Hello, Friend!</h2>
+            <p>Register with your personal details to use all of the site features</p>
+            <button onclick="window.location.href='signup.html'">Signup</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration (replace with actual project credentials)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+            authDomain: "audivue-c9f43.firebaseapp.com",
+            projectId: "audivue-c9f43",
+            storageBucket: "audivue-c9f43.firebasestorage.app",
+            messagingSenderId: "342383567867",
+            appId: "1:342383567867:web:76e03a34c737b140e3615e"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+
+        // Function to sign in user
+        function signIn(email, password) {
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    console.log("User signed in:", user.email);
+                    
+                    // Store user email in local storage for future reference
+                    localStorage.setItem('userEmail', user.email);
+                    
+                    // Reference to the Firestore document for the user
+                    const userRef = firestore.collection('Users').doc(user.email);
+                    
+                    // Check if user document exists in Firestore
+                    userRef.get()
+                        .then((docSnapshot) => {
+                            if (!docSnapshot.exists) {
+                                // Create new user document if it does not exist
+                                const userData = {
+                                    email: user.email,
+                                    uid: user.uid,
+                                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                                };
+
+                                userRef.set(userData)
+                                    .then(() => {
+                                        console.log("User document created in Firestore.");
+                                        window.location.href = 'index.html'; // Redirect after login
+                                    })
+                                    .catch((error) => {
+                                        console.error("Error creating Firestore document:", error);
+                                    });
+                            } else {
+                                console.log("User document already exists:", user.email);
+                                window.location.href = 'index.html'; // Redirect if document exists
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error checking Firestore document:", error);
+                        });
+                })
+                .catch((error) => {
+                    console.error("Sign-in error:", error.code, error.message);
+                    alert("Sign-in failed: " + error.message); // Display error message to user
+                });
+        }
+
+        // Add event listener to login form submission
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            // Get email and password from input fields
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Call signIn function with user input
+            signIn(email, password);
+        });
+    </script>
+</body>
+</html>

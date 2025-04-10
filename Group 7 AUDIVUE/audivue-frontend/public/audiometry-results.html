@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Firebase SDK Scripts (for handling Firebase functionality) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script> <!-- Loads Firebase core library -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script> <!-- Loads Firebase Authentication library -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> <!-- Loads Firebase Firestore library -->
+
+    <script>
+        // Firebase configuration (needed to initialize Firebase services)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY", // API key for authentication
+            authDomain: "audivue-c9f43.firebaseapp.com", // Domain for authentication
+            projectId: "audivue-c9f43", // Firestore project ID
+            storageBucket: "audivue-c9f43.firebasestorage.app", // Cloud storage bucket
+            messagingSenderId: "342383567867", // Messaging sender ID for Firebase Cloud Messaging
+            appId: "1:342383567867:web:76e03a34c737b140e3615e" // Firebase application ID
+        };
+
+        // Initialize Firebase with the configuration
+        const app = firebase.initializeApp(firebaseConfig); // Creates and configures Firebase app instance
+        const firestore = firebase.firestore(); // Initializes Firestore instance for database operations
+        const auth = firebase.auth(); // Initializes Firebase Authentication instance
+    </script>
+
+    <!-- General Metadata -->
+    <meta charset="UTF-8"> <!-- Defines character encoding as UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Makes the page responsive for different screen sizes -->
+    <title>Pure Tone Audiometry - Results</title> <!-- Page title displayed on the browser tab -->
+    <link rel="stylesheet" href="css/style.css"> <!-- Links to external CSS stylesheet -->
+
+    <style>
+        /* Styles for structuring and formatting the test result page */
+        .test-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .test-container {
+            background-color: white; /* Background color of the result container */
+            padding: 2rem; /* Padding around content */
+            border-radius: 16px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Drop shadow effect */
+            width: 100%;
+            max-width: 800px; /* Maximum width */
+        }
+        
+        h1 {
+            color: #333; /* Dark text color */
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        #testResults {
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        #testResults p {
+            margin-bottom: 0.5rem;
+        }
+        
+        #avgResult {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        
+        #advice {
+            list-style-type: none;
+            padding: 0;
+            margin: 2rem 0;
+        }
+        
+        #advice li {
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            background: #f8f8f8;
+            border-radius: 4px;
+            text-align: left;
+        }
+        
+        button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #4caf50;
+            color: white;
+            transition: 0.3s ease;
+            margin: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-page">
+        <div class="test-container">
+            <h1>Pure Tone Audiometry Test Results</h1>
+            
+            <!-- Displaying the test results -->
+            <div id="testResults"></div>
+            
+            <!-- Overall hearing assessment section -->
+            <h2>Overall Hearing Assessment</h2>
+            <p id="avgResult"></p>
+            
+            <!-- Displaying advice based on the results -->
+            <ul id="advice"></ul>
+            
+            <!-- Buttons for retaking the test or going back to the main tests -->
+            <div>
+                <button onclick="window.location.href='audiometry.html'">Retake Test</button> <!-- Redirects user to retake the test -->
+                <button onclick="window.location.href='index.html'">Back to Tests</button> <!-- Redirects user to test selection page -->
+                <button class="print-button" onclick="printResults()">Print Result</button> <!-- Calls function to print test results -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to extract query parameters from the URL (used for retrieving test results)
+        function getQueryParam(param) {
+            let urlParams = new URLSearchParams(window.location.search); // Parses URL parameters
+            return urlParams.get(param) ? JSON.parse(decodeURIComponent(urlParams.get(param))) : null; // Decodes and returns the parameter value
+        }
+
+        // Function to display the test results on the page
+        function displayResults() {
+            let results = getQueryParam('data'); // Retrieve test results from URL query parameters
+            let resultContainer = document.getElementById("testResults");
+            let avgResultContainer = document.getElementById("avgResult");
+            let adviceList = document.getElementById("advice");
+
+            // If no results are found, display a message
+            if (!results || results.length === 0) {
+                resultContainer.innerHTML = "<p>No results found.</p>";
+                return;
+            }
+
+            let totalDb = 0; // Variable to store total decibel levels
+            let count = 0; // Counter for the number of frequency levels
+
+            resultContainer.innerHTML = "<h2>Detailed Results:</h2>";
+            results.forEach(({ frequency, volume }) => {
+                if (typeof volume === "number") {
+                    totalDb += volume; // Add volume (dB) to total
+                    count++; // Increment the count
+                }
+                resultContainer.innerHTML += `<p>Frequency: ${frequency} Hz -  ${volume} dB</p>`; // Display each frequency and volume level
+            });
+
+            // Calculate the average hearing threshold (average dB)
+            let avgDb = count > 0 ? (totalDb / count).toFixed(1) : "No data";
+            avgResultContainer.innerHTML = `<strong>Average Hearing Threshold: ${avgDb} dB</strong>`;
+
+            // Provide advice based on the average dB level
+            if (avgDb === "No data") {
+                adviceList.innerHTML = "<li>Test results not available. Please try again.</li>";
+            } else if (avgDb <= 25) {
+                adviceList.innerHTML = "<li>Your hearing is within normal limits.</li><li>Protect your ears from loud noise.</li>";
+            } else if (avgDb <= 40) {
+                adviceList.innerHTML = "<li>You have mild hearing loss.</li><li>Avoid loud environments.</li>";
+            } else if (avgDb <= 60) {
+                adviceList.innerHTML = "<li>Moderate hearing loss detected.</li><li>Consult an audiologist.</li>";
+            } else {
+                adviceList.innerHTML = "<li>Severe hearing loss detected.</li><li>Consider medical consultation.</li>";
+            }
+
+            // Store the test results in Firebase Firestore
+            storeTestResults(results, avgDb);
+        }
+
+        function storeTestResults(results, avgDb) {
+            const userEmail = localStorage.getItem('userEmail'); // Retrieve stored user email
+            if (!userEmail) return;
+
+            const userRef = firestore.collection('Users').doc(userEmail);
+            const testRef = userRef.collection('Audiometry Test').doc(); // Creates a new document
+
+            testRef.set({
+                results, 
+                averageHearingThreshold: avgDb,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        function printResults() {
+            const printContent = document.querySelector('.test-container').innerHTML;
+            document.body.innerHTML = printContent;
+            window.print();
+            location.reload(); // Reload to restore page after print
+        }
+
+        window.onload = displayResults; // Calls function when the page loads
+    </script>
+</body>
+</html>
