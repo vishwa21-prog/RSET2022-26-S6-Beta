@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Ear & Eye Tests</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Main page container -->
+    <div class="test-page">
+        <div class="test-container white-card">
+            <h1>Sign Up</h1>
+            
+            <!-- Sign-up form for user registration with additional demographic fields -->
+            <form id="signupForm">
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                
+                <!-- Gender -->
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select id="gender" required>
+                        <option value="" selected disabled>Select Gender</option>
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <!-- Date of Birth -->
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" required>
+                </div>
+                
+                <!-- Submit button to create the account -->
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+            
+            <!-- Link to navigate to the login page if the user already has an account -->
+            <p>Already have an account? <a href="login.html">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs for Authentication and Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+      // Firebase configuration object (replace with your own credentials)
+      const firebaseConfig = {
+        apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+        authDomain: "audivue-c9f43.firebaseapp.com",
+        databaseURL: "https://audivue-c9f43-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "audivue-c9f43",
+        storageBucket: "audivue-c9f43.firebasestorage.app",
+        messagingSenderId: "342383567867",
+        appId: "1:342383567867:web:76e03a34c737b140e3615e"
+      };
+
+      // Initialize Firebase with the configuration object
+      const app = firebase.initializeApp(firebaseConfig);
+
+      // Get references to Firebase Authentication and Database services
+      const auth = firebase.auth();
+      const database = firebase.database();
+
+      // Function to sign up a new user using email and password
+      function signUp(email, password, demographics) {
+        return auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            console.log('User signed up:', user);
+            
+            // Save the user details to the Realtime Database
+            saveUserToDatabase(user, demographics);
+            
+            // Redirect the user to the main page after successful sign-up
+            window.location.href = 'index.html';
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Sign-up error:', errorCode, errorMessage);
+            alert('Sign-up failed: ' + errorMessage);
+          });
+      }
+
+      // Function to save user data to Firebase Realtime Database
+      function saveUserToDatabase(user, demographics) {
+        const usersRef = database.ref('users/' + user.uid);
+        
+        // Calculate age from date of birth if not provided
+        if (!demographics.age) {
+          const dob = new Date(demographics.dob);
+          const today = new Date();
+          let age = today.getFullYear() - dob.getFullYear();
+          const monthDiff = today.getMonth() - dob.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+          }
+          demographics.age = age + " y";
+        }
+        
+        usersRef.set({
+          email: user.email,
+          demographics: demographics,
+          createdAt: Date.now()
+        })
+        .catch((error) => {
+          console.error('Error saving user to database:', error);
+        });
+      }
+
+      // Event listener for the form submission
+      document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect all form data
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const demographics = {
+          name: document.getElementById('name').value,
+          gender: document.getElementById('gender').value,
+          dob: document.getElementById('dob').value
+        };
+        
+        // Call the signUp function to register the user with demographics
+        signUp(email, password, demographics);
+      });
+    </script>
+</body>
+</html>

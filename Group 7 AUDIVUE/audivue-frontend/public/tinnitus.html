@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tinnitus Frequency Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Inline CSS */
+        .test-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .test-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-container {
+            margin: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            width: 100%;
+            text-align: left;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        button {
+            margin: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-page">
+        <div class="test-container">
+            <h1>Tinnitus Frequency Test</h1>
+            <p>Adjust the frequency and volume until it matches your perceived tinnitus sound.</p>
+
+            <!-- Frequency Slider -->
+            <div class="slider-container">
+                <label for="frequency">Frequency (Hz):</label>
+                <input type="range" id="frequency" min="5000" max="8000" step="50" value="6000">
+                <span id="frequencyValue">6000</span> Hz
+            </div>
+
+            <!-- Volume Slider -->
+            <div class="slider-container">
+                <label for="volume">Volume (dB):</label>
+                <input type="range" id="volume" min="0" max="15" step="1" value="7">
+                <span id="volumeValue">7</span> dB
+            </div>
+
+            <button id="playTone">Play Tone</button>
+            <button id="stopTone" disabled>Stop Tone</button>
+            <button id="submitTest" disabled>Submit Results</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const playButton = document.getElementById("playTone");
+            const stopButton = document.getElementById("stopTone");
+            const submitButton = document.getElementById("submitTest");
+
+            const frequencySlider = document.getElementById("frequency");
+            const volumeSlider = document.getElementById("volume");
+
+            const frequencyDisplay = document.getElementById("frequencyValue");
+            const volumeDisplay = document.getElementById("volumeValue");
+
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            let oscillator, gainNode;
+
+            // Function to start the tone
+            function startTone(frequency, volume) {
+                stopTone();
+
+                oscillator = audioContext.createOscillator();
+                gainNode = audioContext.createGain();
+
+                oscillator.type = "sine";
+                oscillator.frequency.value = frequency;
+
+                let gainValue = Math.pow(10, volume / 20);
+                gainNode.gain.value = gainValue;
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start();
+            }
+
+            // Function to stop the tone
+            function stopTone() {
+                if (oscillator) {
+                    oscillator.stop();
+                    oscillator.disconnect();
+                }
+            }
+
+            // Update frequency display when slider is moved
+            frequencySlider.addEventListener("input", function () {
+                frequencyDisplay.textContent = frequencySlider.value;
+                if (oscillator) oscillator.frequency.value = frequencySlider.value;
+            });
+
+            // Update volume display when slider is moved
+            volumeSlider.addEventListener("input", function () {
+                volumeDisplay.textContent = volumeSlider.value;
+                if (gainNode) gainNode.gain.value = Math.pow(10, volumeSlider.value / 20);
+            });
+
+            // Play tone when button is clicked
+            playButton.addEventListener("click", function () {
+                startTone(frequencySlider.value, volumeSlider.value);
+                stopButton.disabled = false;
+                submitButton.disabled = false;
+            });
+
+            // Stop tone when button is clicked
+            stopButton.addEventListener("click", function () {
+                stopTone();
+                stopButton.disabled = true;
+            });
+
+            // Submit results when button is clicked
+            submitButton.addEventListener("click", function () {
+                const tinnitusData = {
+                    frequency: frequencySlider.value,
+                    volume: volumeSlider.value,
+                    testName: 'Tinnitus Test',
+                    score: volumeSlider.value,
+                    details: {
+                        frequency: frequencySlider.value,
+                        volume: volumeSlider.value
+                    }
+                };
+
+                // Display test results in the console (or you can use it for further action, like saving to local storage)
+                console.log('Test Results:', tinnitusData);
+
+                // Redirect to results page with the test data encoded in URL
+                const resultData = encodeURIComponent(JSON.stringify(tinnitusData));
+                window.location.href = `tinnitus-results.html?data=${resultData}`;
+            });
+        });
+    </script>
+</body>
+</html>

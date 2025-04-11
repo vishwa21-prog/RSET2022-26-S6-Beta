@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results</title>
+
+    <!-- Firebase SDKs for authentication and Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script> <!-- Firebase app SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script> <!-- Firebase Authentication SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> <!-- Firebase Firestore SDK -->
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+            authDomain: "audivue-c9f43.firebaseapp.com",
+            databaseURL: "https://audivue-c9f43-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "audivue-c9f43",
+            storageBucket: "audivue-c9f43.firebasestorage.app",
+            messagingSenderId: "342383567867",
+            appId: "1:342383567867:web:76e03a34c737b140e3615e"
+        };
+
+        // Initialize Firebase app, auth, and firestore services
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .test-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%);
+        }
+
+        .test-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 180, 219, 0.5);
+            max-width: 600px;
+            width: 80%;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 180, 219, 0.3);
+            color: black;
+            transition: 0.5s;
+        }
+        .test-container:hover{
+         transform:scale(1.05) ;
+         box-shadow: 0 0 5px #008cff, 0 0 20px #008cff, 0 0 50px #008cff,
+      0 0 100px #008cff;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #00b4db, #0083b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: black;
+            text-shadow: 0 0 10px rgba(0, 180, 219, 0.3);
+        }
+
+        .results {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            color: black;
+        }
+
+        .back-button {
+            background: #4caf50;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: white;
+            margin-top: 1rem;
+            margin-left: 20px;
+        }
+        .back-button:hover {
+            background: #45a049;
+        }
+
+        .restart-button {
+            background: #ff6a00;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: white;
+            margin-top: 1rem;
+        }
+
+        .restart-button.hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-page">
+        <div class="test-container">
+            <h1>Test Results</h1>
+            <div id="results" class="results"></div>
+            <div>
+                <button class="back-button" onclick="window.location.href = 'visual-acuity.html';">Retake Test</button>
+                <button class="back-button" onclick="printResults()">Print Result</button>
+                <button class="back-button" onclick="window.location.href = 'index.html';">Return to Main Menu</button>
+                <button id="restart-button" class="restart-button hidden" onclick="restartTest()">Restart Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            // Retrieve the test results from sessionStorage
+            const result = JSON.parse(sessionStorage.getItem('testResult'));
+
+            if (result) {
+                // Get diopter and determine the myopia status
+                const diopter = result.diopter;
+                let status = getMyopiaStatus(diopter);
+
+                // Display the result and dynamic status message
+                document.getElementById('results').innerHTML = `
+                    <p>Your Diopter: ${diopter}</p>
+                    <p>Your Snellen Score: ${result.snellen}</p>
+                    <p>Status: ${status}</p>
+                `;
+
+                // Optionally, store the test results in Firestore if user is authenticated
+                storeTestResults(result, status);
+            } else {
+                document.getElementById('results').innerText = "No results available.";
+            }
+        };
+
+        // Function to determine myopia status based on diopter value
+        function getMyopiaStatus(diopter) {
+            if (diopter >= -0.5) {
+                return "No Myopia";
+            } else if (diopter >= -3.00) {
+                return "Mild Myopia";
+            } else if (diopter >= -6.00) {
+                return "Moderate Myopia";
+            } else {
+                return "High Myopia";
+            }
+        }
+
+        // Function to store the visual acuity test results in Firestore
+        function storeTestResults(result, status) {
+            const userEmail = localStorage.getItem('userEmail'); // Get the user's email from localStorage
+
+            if (userEmail) {
+                const userRef = firestore.collection('Users').doc(userEmail);
+
+                // Store the test result under a subcollection 'Visual Acuity Test'
+                const testRef = userRef.collection('Visual Acuity Test').doc(); // New document in the 'Visual Acuity Test' collection
+
+                const testData = {
+                    diopter: result.diopter,
+                    snellen: result.snellen,
+                    status: status,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp() // Save the current timestamp
+                };
+
+                testRef.set(testData)
+                    .then(() => {
+                        console.log("Test results successfully stored in Firestore under 'Visual Acuity Test'.");
+                    })
+                    .catch((error) => {
+                        console.error("Error storing test results:", error);
+                    });
+            } else {
+                console.error("User email not found in localStorage.");
+            }
+        }
+
+        // Function to print the test results
+        function printResults() {
+            const printContent = document.querySelector('.test-container').innerHTML;
+            const originalContent = document.body.innerHTML;
+
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            window.location.reload(); // Reload the page to restore functionality
+        }
+
+        // Restart the test (optional)
+        function restartTest() {
+            sessionStorage.removeItem('testResult'); // Clear stored result
+            window.location.href = 'visual-acuity.html'; // Redirect to test page
+        }
+    </script>
+</body>
+
+</html>

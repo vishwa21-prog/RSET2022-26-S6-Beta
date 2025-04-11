@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Acuity Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .test-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%);
+        }
+
+        .test-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 180, 219, 0.5);
+            max-width: 600px;
+            width: 80%;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 180, 219, 0.3);
+            position: relative;
+            color: black;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #00b4db, #0083b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: black;
+            text-shadow: 0 0 10px rgba(0, 180, 219, 0.3);
+        }
+
+        .character-display {
+            font-weight: bold;
+            color: rgba(0, 20, 40, 0.8);
+            margin: 2rem 0;
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+            position: relative;
+        }
+
+        input {
+            background: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: black;
+            box-shadow: 0 0 10px rgba(0, 180, 219, 0.5);
+        }
+
+        button {
+            background: linear-gradient(90deg, #020024 0%, #1b3c87 40%, #00b4db 100%);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 180, 219, 0.5);
+        }
+
+        .result-message {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            color: #00f2fe;
+        }
+
+        .restart-button {
+            background: linear-gradient(45deg, #ff6a00, #ff1e00);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: white;
+            margin-top: 1rem;
+        }
+
+        .restart-button.hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-page">
+        <div class="test-container">
+            <h1>Visual Acuity Test</h1>
+            <div id="character-display" class="character-display"></div>
+
+            <form id="input-form" onsubmit="handleSubmit(event)">
+                <input type="text" id="user-input" placeholder="Enter character" maxlength="1" autofocus>
+                <button type="submit">Submit</button>
+            </form>
+
+            <div id="result-message" class="result-message"></div>
+
+            <button id="restart-button" class="restart-button hidden" onclick="restartTest()">Restart Test</button>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        const allCharacters = [
+            { character: "E", size: 6, diopter: -0.50 },
+            { character: "F", size: 8, diopter: -0.75 },
+            { character: "P", size: 10, diopter: -1.00 },
+            { character: "T", size: 15, diopter: -1.50 },
+            { character: "O", size: 20, diopter: -2.00 },
+            { character: "Z", size: 25, diopter: -2.50 },
+            { character: "L", size: 30, diopter: -3.00 },
+            { character: "D", size: 40, diopter: -3.50 },
+            { character: "A", size: 50, diopter: -4.00 }
+        ];
+
+        let testChars = shuffle(allCharacters);
+        let currentIndex = 0;
+        let correctAnswersCount = 0;
+        let result = { diopter: 0, snellen: "", status: "" };
+
+        window.onload = startTest;
+
+        function startTest() {
+            // Sort the characters by size in descending order (biggest to smallest)
+            testChars.sort((a, b) => b.size - a.size);
+            displayCharacter();
+            document.getElementById("restart-button").classList.add("hidden");
+        }
+
+        function displayCharacter() {
+            const currentChar = testChars[currentIndex];
+            const characterDisplay = document.getElementById("character-display");
+            characterDisplay.textContent = currentChar.character;
+            characterDisplay.style.fontSize = `${currentChar.size}px`; 
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            const userInput = document.getElementById("user-input").value.toUpperCase();
+            const currentChar = testChars[currentIndex].character;
+
+            if (userInput === currentChar) {
+                correctAnswersCount++;
+            } else {
+                // End the test early but still save the results
+                calculateResult();
+                finishTest();
+                return;
+            }
+
+            if (currentIndex < testChars.length - 1) {
+                currentIndex++;
+                displayCharacter();
+                document.getElementById("user-input").value = "";
+            } else {
+                calculateResult();
+                finishTest();
+            }
+        }
+
+        function calculateResult() {
+            const snellenValue = Math.round((6 / testChars[currentIndex].size) * 50);
+            result = {
+                diopter: testChars[currentIndex].diopter,
+                snellen: `6/${snellenValue > 60 ? 60 : snellenValue}`,
+                status: getMyopiaStatus(testChars[currentIndex].diopter)
+            };
+
+            sessionStorage.setItem('testResult', JSON.stringify({ ...result, correctAnswersCount }));
+        }
+
+        function getMyopiaStatus(diopter) {
+            if (diopter > 0) {
+                return "No Myopia";
+            } else if (diopter >= -3.00) {
+                return "Mild Myopia";
+            } else if (diopter >= -6.00) {
+                return "Moderate Myopia";
+            } else {
+                return "High Myopia";
+            }
+        }
+
+        function finishTest() {
+            document.getElementById("result-message").textContent = `Test completed! You answered ${correctAnswersCount} characters correctly.`;
+            setTimeout(() => {
+                window.location.href = 'visual-acuity-results.html'; // Redirect to results page after 2 seconds
+            }, 2000);
+        }
+
+        function restartTest() {
+            testChars = shuffle(allCharacters);
+            currentIndex = 0;
+            correctAnswersCount = 0;
+            result = { diopter: 0, snellen: "", status: "" };
+            document.getElementById("result-message").textContent = "";
+            document.getElementById("restart-button").classList.add("hidden");
+            startTest();
+        }
+
+        function shuffle(array) {
+            let shuffledArray = [...array];
+            for (let i = shuffledArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+            }
+            return shuffledArray;
+        }
+    </script>
+</body>
+
+</html>

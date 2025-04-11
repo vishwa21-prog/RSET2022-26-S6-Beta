@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ear & Eye Tests</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Main Page Content (Ear & Eye Tests) -->
+    <div class="tests-page">
+        <div class="container">
+            <h1>Ear & Eye Tests</h1>
+
+            <!-- Authentication Status -->
+            <div id="authStatus">
+                <p>Welcome, <span id="userName">Guest</span></p>
+                <button id="logoutButton" class="btn" style="display: none;">Logout</button>
+            </div>
+
+            <p class="description">Choose a test below to get started!</p>
+
+            <!-- Test Options -->
+            <div class="test-grid">
+                <a href="visual-acuity-instructions.html" class="test-card">
+                    <h2>Visual Acuity Test</h2>
+                    <p>Check your vision sharpness</p>
+                </a>
+                <a href="amsler-grid-instructions.html" class="test-card">
+                    <h2>Amsler Grid Test</h2>
+                    <p>Assess for potential vision issues</p>
+                </a>
+                <a href="ishihara-instructions.html" class="test-card">
+                    <h2>Ishihara Color Test</h2>
+                    <p>Test for color blindness</p>
+                </a>
+                <a href="audiometry-instructions.html" class="test-card">
+                    <h2>Pure Tone Audiometry</h2>
+                    <p>Check your hearing ability</p>
+                </a>
+                <a href="tinnitus-instructions.html" class="test-card">
+                    <h2>Tinnitus Test</h2>
+                    <p>Assess for ringing in the ears</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Button -->
+    <button id="chatbotToggle" class="chatbot-btn">💬 Chat with Dr. Strange</button>
+
+    <!-- Chatbot Window -->
+    <div id="chatbotContainer" class="chat-container">
+        <div class="chat-header">
+            <h2>Dr. Strange - Healthcare Assistant</h2>
+            <button id="closeChat">❌</button>
+        </div>
+        <div id="chatBox" class="chat-box"></div>
+        <input type="text" id="chatInput" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+            authDomain: "audivue-c9f43.firebaseapp.com",
+            databaseURL: "https://audivue-c9f43-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "audivue-c9f43",
+            storageBucket: "audivue-c9f43.firebasestorage.app",
+            messagingSenderId: "342383567867",
+            appId: "1:342383567867:web:76e03a34c737b140e3615e"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        function checkAuthState() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    document.getElementById('userName').textContent = user.email;
+                    document.getElementById('logoutButton').style.display = 'inline-block';
+                } else {
+                    document.getElementById('userName').textContent = 'Guest';
+                    document.getElementById('logoutButton').style.display = 'none';
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+
+        function signOut() {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+            });
+        }
+
+        checkAuthState();
+        document.getElementById('logoutButton').addEventListener('click', signOut);
+    </script>
+
+    <!-- Chatbot Functionality -->
+    <script>
+        document.getElementById("chatbotToggle").addEventListener("click", function() {
+            document.getElementById("chatbotContainer").style.display = "block";
+        });
+
+        document.getElementById("closeChat").addEventListener("click", function() {
+            document.getElementById("chatbotContainer").style.display = "none";
+        });
+
+        async function sendMessage() {
+            const userMessage = document.getElementById("chatInput").value;
+            if (!userMessage.trim()) return;
+
+            const chatBox = document.getElementById("chatBox");
+            chatBox.innerHTML += `<p><strong>You:</strong> ${userMessage}</p>`;
+            document.getElementById("chatInput").value = "";
+
+            try {
+                const response = await fetch("http://localhost:3000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userMessage })
+                });
+
+                const data = await response.json();
+                if (data.reply) {
+                    chatBox.innerHTML += `<p><strong>Dr. Strange:</strong> ${data.reply}</p>`;
+                } else {
+                    chatBox.innerHTML += `<p><strong>Dr. Strange:</strong> No response received.</p>`;
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                chatBox.innerHTML += `<p><strong>Dr. Strange:</strong> Error connecting to server.</p>`;
+            }
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+
+    <style>
+        .chatbot-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #004080;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .chat-container {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 320px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+            padding: 10px;
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            background: #004080;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px 10px 0 0;
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f8f8;
+        }
+    </style>
+</body>
+</html>
