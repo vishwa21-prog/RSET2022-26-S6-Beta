@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for character encoding and viewport settings -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title of the page that appears in the browser tab -->
+    <title>Ishihara Test Results</title>
+
+    <!-- Firebase SDKs for app functionality -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFZS00IGb-Huhv6jRmfVfc0MrE86WsQgY",
+            authDomain: "audivue-c9f43.firebaseapp.com",
+            projectId: "audivue-c9f43",
+            storageBucket: "audivue-c9f43.firebasestorage.app",
+            messagingSenderId: "342383567867",
+            appId: "1:342383567867:web:76e03a34c737b140e3615e"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+    </script>
+
+    <!-- Link to an external CSS file for styling the page -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Container for the results page -->
+    <div class="results-container">
+        <!-- Header section displaying the title of the results page -->
+        <div class="result-header">
+            <h1>Ishihara Color Blindness Test Results</h1>
+        </div>
+        
+        <!-- Summary of results displayed here after completing the test -->
+        <div id="result-summary" class="result-summary">
+            <h2>Summary</h2>
+            <!-- Placeholder text for the summary, to be populated dynamically -->
+            <p id="summary-text">Your results will appear here after completing the test.</p>
+        </div>
+        
+        <!-- Detailed results section where answers and comparisons are shown -->
+        <div id="result-details" class="result-details">
+            <!-- Detailed results will be dynamically inserted by JavaScript -->
+        </div>
+        
+        <!-- Actions that the user can take: print results, share, or return to the test page -->
+        <div class="result-actions">
+            <!-- Button to trigger the print functionality -->
+            <button class="print-button" onclick="printResults()">Print Results</button>
+            <!-- Return to Main Menu Button (similar to Amsler) -->
+            <button onclick="goToMainMenu()" class="print-button">Return to Main Menu</button>
+        </div>
+    </div>
+
+    <!-- JavaScript section that handles dynamic content population and actions -->
+    <script>
+        // Function to extract answers from the URL parameters
+        function getAnswersFromURL() {
+            // Parse URL parameters to get user responses
+            const queryParams = new URLSearchParams(window.location.search);
+            const answers = {};
+            
+            // Loop through the 14 test questions to get each answer
+            for (let i = 1; i <= 14; i++) {
+                // Default to 'No answer' if the question was not answered
+                answers[i] = queryParams.get(`q${i}`) || 'No answer';
+            }
+            
+            return answers;
+        }
+        
+        // Function to generate the results based on user answers and correct answers
+        function generateResults() {
+            // Get the answers from the URL
+            const answers = getAnswersFromURL();
+            
+            // Define the correct answers for the 14 questions
+            const correctAnswers = {
+                1: '96', 2: 'VISION', 3: '15', 4: '26', 5: '12', 6: '15',
+                7: '73', 8: '6', 9: '74', 10: 'eye', 11: 'heart', 12: 'COLOR',
+                13: '57', 14: '2'
+            };
+            
+            let correctCount = 0;
+            let detailsHTML = '<h2>Detailed Results</h2>';
+            
+            // Loop through each of the 14 tests to compare the user's answers with the correct ones
+            for (let i = 1; i <= 14; i++) {
+                const isCorrect = answers[i].toLowerCase() === correctAnswers[i].toLowerCase();
+                correctCount += isCorrect ? 1 : 0;
+                
+                // Generate the HTML for each test result, including the user answer, correct answer, and result (correct or incorrect)
+                detailsHTML += `
+                    <div class="result-item">
+                        <img src="images/ishi${i}.png" alt="Ishihara Test ${i}" class="result-image">
+                        <div class="result-info">
+                            <div class="result-number">Test ${i}</div>
+                            <div>Your answer: <span class="user-answer">${answers[i]}</span></div>
+                            <div>Correct answer: <span class="correct-answer">${correctAnswers[i]}</span></div>
+                            <div class="${isCorrect ? 'match' : 'no-match'}">
+                                ${isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Insert the generated result details into the page
+            document.getElementById('result-details').innerHTML = detailsHTML;
+            
+            // Generate a summary of the test results
+            const summaryText = `
+                You answered ${correctCount} out of 14 questions correctly.
+                <br><br>
+                ${correctCount >= 12 ? 
+                    'Your results suggest normal color vision.' : 
+                    'Your results may indicate color vision deficiency. ' +
+                    'We recommend consulting with an eye care professional for a comprehensive evaluation.'}
+            `;
+            
+            // Insert the summary text into the page
+            document.getElementById('summary-text').innerHTML = summaryText;
+
+            // Store the test results in Firestore
+            storeTestResults(correctCount);
+        }
+        
+        // Function to store the test results in Firestore
+        function storeTestResults(correctCount) {
+            const userEmail = localStorage.getItem('userEmail'); // Get the user's email from localStorage
+
+            if (userEmail) {
+                const userRef = firestore.collection('Users').doc(userEmail);
+
+                // Store the test result under a subcollection 'Ishihara Colour Test'
+                const testRef = userRef.collection('Ishihara Colour Test').doc();
+
+                const testData = {
+                    correctAnswersCount: correctCount,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                testRef.set(testData)
+                    .then(() => {
+                        console.log("Test results successfully stored in Firestore.");
+                    })
+                    .catch((error) => {
+                        console.error("Error storing test results:", error);
+                    });
+            } else {
+                console.error("User email not found in localStorage.");
+            }
+        }
+        
+        // Function to go to the Main Menu page
+        function goToMainMenu() {
+            window.location.href = 'index.html'; // Redirect to the main menu page
+        }
+        
+        // Function to print the results page
+        function printResults() {
+            window.print(); // Trigger the browser's print dialog
+        }
+        
+        // When the page loads, generate the results
+        window.onload = generateResults;
+    </script>
+</body>
+</html>
