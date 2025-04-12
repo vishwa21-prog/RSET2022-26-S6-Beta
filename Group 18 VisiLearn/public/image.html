@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>VisiLearn | Image Recognition</title>
+		<link rel="stylesheet" href="image.css" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter&family=Poppins&family=Cinzel"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<div class="navbar">
+			<div class="left">VisiLearn</div>
+			<div class="right">
+				<a href="tts.html">Speech</a>
+				<a href="braille.html">Braille</a>
+				<a href="summarizer.html">Summarize</a>
+				<a href="image.html">Image</a>
+				<a href="translate.html">Translate</a>
+			</div>
+		</div>
+		<h1>Image Recognition</h1>
+		<input type="file" id="imageInput" accept="image/*" />
+		<button onclick="analyzeImage()">Analyze image</button>
+		<div id="description"></div>
+
+		<script src="image.js"></script>
+	</body>
+</html>
