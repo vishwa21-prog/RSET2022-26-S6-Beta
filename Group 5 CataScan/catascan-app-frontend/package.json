@@ -1,0 +1,41 @@
+{
+  "name": "catascan-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.0.14",
+    "framer-motion": "^12.6.2",
+    "icons": "^1.0.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.483.0",
+    "mapbox-gl": "^3.11.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-easy-crop": "^5.4.1",
+    "react-icons": "^5.5.0",
+    "react-image-crop": "^11.0.7",
+    "react-leaflet": "^5.0.0",
+    "react-map-gl": "^8.0.2",
+    "react-router-dom": "^7.3.0",
+    "react-toastify": "^11.0.5",
+    "tailwindcss": "^4.0.14"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "vite": "^6.2.0"
+  }
+}
